@@ -415,53 +415,79 @@ export const AwsDeploymentGuide: React.FC = () => {
               {/* Account 1 */}
               <div style={{ background: '#0b1120', padding: '18px', borderRadius: 'var(--radius-md)', border: '1px solid rgba(6, 182, 212, 0.3)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <strong style={{ color: 'var(--accent-cyan)', fontSize: '0.95rem' }}>Account 1: Production Frontend & CDN</strong>
-                  <span className="badge badge-cyan">Primary</span>
+                  <strong style={{ color: 'var(--accent-cyan)', fontSize: '0.95rem' }}>Account 1: Edge, Frontend & Identity</strong>
+                  <span className="badge badge-cyan">$100 Credit</span>
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)', marginBottom: '12px' }}>
-                  Dedicated to public-facing edge speed and DNS security
+                  Public edge delivery, perimeter security, and deal team authentication
                 </div>
                 <ul style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: 1.7, paddingLeft: '18px' }}>
-                  <li><strong>Amazon CloudFront</strong> (Global Edge CDN)</li>
-                  <li><strong>Amazon S3</strong> (Static Web App Hosting)</li>
-                  <li><strong>CloudFront OAC</strong> (Private Origin Security)</li>
-                  <li><strong>Amazon Cognito</strong> (Deal Team Sign-in & MFA)</li>
+                  <li><strong>Amazon CloudFront</strong> (Global Edge CDN - 400+ PoPs)</li>
+                  <li><strong>Amazon S3</strong> (Static Web App Bundle Hosting)</li>
+                  <li><strong>CloudFront OAC</strong> (Origin Access Control Security)</li>
+                  <li><strong>AWS WAF</strong> (Anti-DDoS & Scraper Defense Rules)</li>
+                  <li><strong>Amazon Cognito</strong> (Deal Team User Pool, MFA & JWT)</li>
+                  <li><strong>Amazon Route 53</strong> (Enterprise DNS Routing)</li>
+                  <li><strong>AWS Certificate Manager</strong> (Free Auto-Renewing SSL/TLS)</li>
                 </ul>
               </div>
 
               {/* Account 2 */}
               <div style={{ background: '#0b1120', padding: '18px', borderRadius: 'var(--radius-md)', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <strong style={{ color: '#c084fc', fontSize: '0.95rem' }}>Account 2: Intelligence Engine & Database</strong>
-                  <span className="badge badge-purple">Core Compute</span>
+                  <strong style={{ color: '#c084fc', fontSize: '0.95rem' }}>Account 2: Core Deal Engine & GenAI</strong>
+                  <span className="badge badge-purple">$100 Credit</span>
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)', marginBottom: '12px' }}>
-                  Executes financial scoring, GenAI synthesis, and confidential data
+                  Confidential corporate finance underwriting, database, and generative AI
                 </div>
                 <ul style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: 1.7, paddingLeft: '18px' }}>
-                  <li><strong>AWS Lambda</strong> (M&A Financial Scoring Engine)</li>
-                  <li><strong>Amazon API Gateway</strong> (RESTful endpoints)</li>
-                  <li><strong>Amazon DynamoDB</strong> (Target & Pipeline Store)</li>
-                  <li><strong>Amazon Bedrock</strong> (AI IC Memo Generation)</li>
-                  <li><strong>Amazon Textract</strong> (CIM OCR Extraction)</li>
+                  <li><strong>AWS Lambda</strong> (Python Valuation & Underwriting Engine)</li>
+                  <li><strong>Amazon API Gateway</strong> (Cognito-Secured REST API)</li>
+                  <li><strong>Amazon DynamoDB</strong> (Targets & Deals - On-Demand)</li>
+                  <li><strong>Amazon Bedrock</strong> (Claude / Titan GenAI IC Memos)</li>
+                  <li><strong>Amazon Textract</strong> (CIM PDF Balance Sheet OCR)</li>
+                  <li><strong>Amazon S3 VDR</strong> (Confidential Virtual Data Room)</li>
+                  <li><strong>AWS KMS</strong> (Customer Managed Encryption Keys - CMEK)</li>
                 </ul>
               </div>
 
               {/* Account 3 */}
               <div style={{ background: '#0b1120', padding: '18px', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <strong style={{ color: 'var(--accent-emerald)', fontSize: '0.95rem' }}>Account 3: Market Feed Scrapers & Logging</strong>
-                  <span className="badge badge-emerald">Automation</span>
+                  <strong style={{ color: 'var(--accent-emerald)', fontSize: '0.95rem' }}>Account 3: Pipelines & Governance</strong>
+                  <span className="badge badge-emerald">$100 Credit</span>
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)', marginBottom: '12px' }}>
-                  Runs daily cron jobs, scrapers, and centralized audit trails
+                  Workflow state machines, queues, daily cron jobs, and credit safety
                 </div>
                 <ul style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: 1.7, paddingLeft: '18px' }}>
-                  <li><strong>Amazon EventBridge</strong> (Daily Scheduled Crons)</li>
-                  <li><strong>Amazon SNS</strong> (Email Deal Alerts to MDs)</li>
-                  <li><strong>Amazon CloudWatch</strong> (Audit Logging & Alarms)</li>
-                  <li><strong>AWS CloudFormation</strong> (Automated Stack Deployment)</li>
+                  <li><strong>AWS Step Functions</strong> (Due Diligence State Machine)</li>
+                  <li><strong>Amazon SQS</strong> (CIM Ingestion Buffer & Dead-Letter Queue)</li>
+                  <li><strong>Amazon EventBridge</strong> (Daily Market Scraper Crons)</li>
+                  <li><strong>Amazon SNS</strong> (Deal Alerts to MDs & Investment Committee)</li>
+                  <li><strong>AWS Secrets Manager</strong> (SEC EDGAR & Financial API Keys)</li>
+                  <li><strong>Amazon CloudWatch</strong> (Centralized Audit Logs & Alarms)</li>
+                  <li><strong>AWS Budgets</strong> ($80 Credit Safety Kill-Switch)</li>
                 </ul>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '24px', background: 'rgba(9, 13, 22, 0.95)', border: '1px solid var(--border-accent)', borderRadius: 'var(--radius-md)', padding: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <strong style={{ color: '#ffffff', fontSize: '0.9rem' }}>1-Click Multi-Account Deployment Command:</strong>
+                <span className="badge badge-cyan">Automated CLI</span>
+              </div>
+              <div style={{
+                background: '#090d16',
+                padding: '12px 16px',
+                borderRadius: 'var(--radius-md)',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.8rem',
+                color: 'var(--accent-cyan)',
+                whiteSpace: 'pre-wrap',
+              }}>
+                ./deploy-multi-account.sh aura-account1 aura-account2 aura-account3 deals@yourfirm.com
               </div>
             </div>
           </div>

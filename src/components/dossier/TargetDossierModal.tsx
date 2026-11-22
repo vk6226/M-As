@@ -19,26 +19,31 @@ import {
   Award, 
   Plus, 
   Check, 
-  ExternalLink 
+  ExternalLink,
+  Scale
 } from 'lucide-react';
 import { formatCurrency, formatMultiple, formatPercent } from '../../utils/financialFormulas';
+import { MOCK_LEGAL_DOCUMENTS } from '../../data/legalDocuments';
+import { generateLegalAgreementMarkdown, downloadTextFile } from '../../utils/exportUtils';
 
-type DossierTab = 'overview' | 'financials' | 'synergies' | 'risks' | 'ic-memo';
+type DossierTab = 'overview' | 'financials' | 'synergies' | 'risks' | 'legal' | 'ic-memo';
 
 export const TargetDossierModal: React.FC = () => {
-  const { selectedTarget, setSelectedTarget, addToPipeline, pipeline } = useDealflow();
+  const { selectedTarget, setSelectedTarget, addToPipeline, pipeline, showToast } = useDealflow();
   const [activeTab, setActiveTab] = useState<DossierTab>('overview');
 
   if (!selectedTarget) return null;
 
   const target = selectedTarget;
   const isAlreadyInPipeline = pipeline.some((p) => p.targetId === target.id);
+  const targetLegalDocs = MOCK_LEGAL_DOCUMENTS.filter((d) => d.targetId === target.id);
 
   const tabs: { id: DossierTab; label: string; icon: React.ReactNode; count?: number }[] = [
     { id: 'overview', label: 'Overview & Strategy', icon: <Zap size={15} /> },
     { id: 'financials', label: 'Financial Teardown', icon: <BarChart3 size={15} /> },
     { id: 'synergies', label: 'Synergy Simulator', icon: <Sparkles size={15} /> },
     { id: 'risks', label: 'Risks & Due Diligence', icon: <ShieldAlert size={15} />, count: target.risks.length },
+    { id: 'legal', label: 'Legal & Compliance', icon: <Scale size={15} />, count: targetLegalDocs.length },
     { id: 'ic-memo', label: 'IC Memo Generator', icon: <FileText size={15} /> },
   ];
 
@@ -416,7 +421,245 @@ export const TargetDossierModal: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 5: IC MEMO TEASER */}
+          {/* TAB 5: LEGAL & REGULATORY COMPLIANCE */}
+          {activeTab === 'legal' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{
+                background: 'rgba(15, 23, 42, 0.7)',
+                padding: '16px 20px',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-subtle)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '12px',
+              }}>
+                <div>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#ffffff' }}>
+                    Transaction Legal Instruments & Regulatory Filing Dossier
+                  </h4>
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    Active Definitive Agreements, HSR Antitrust Filings, MNDA Clean Room covenants, and IP Inventions Assignments for {target.name}.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={() => {
+                      const doc = targetLegalDocs[0] || {
+                        docNumber: `LOI-${target.codeName.toUpperCase()}`,
+                        title: `Standard LOI // ${target.name}`,
+                        targetName: target.name,
+                        codeName: target.codeName,
+                        category: 'Definitive Purchase (SPA/APA)',
+                        counselOfRecord: 'Skadden Arps',
+                        governingLaw: 'State of Delaware',
+                        lastUpdated: '2026-10-20',
+                        effectiveDate: 'Draft Working Copy',
+                        summary: `Term sheet and indication of interest for ${target.name}.`,
+                        keyTerms: [{ label: 'Indicative Valuation', value: `$${target.valuation.targetEnterpriseValue}M EV` }],
+                        clauses: [{ section: 'Section 1', title: 'Exclusivity', content: '45-day bilateral exclusivity period.' }],
+                        signatures: [{ role: 'Acquirer', entity: 'APEX', signatory: 'Marcus Vance', status: 'Signed' }]
+                      };
+                      downloadTextFile(generateLegalAgreementMarkdown(doc), `${doc.docNumber}.md`, 'text/markdown');
+                      showToast('success', 'Document Downloaded', `Exported legal file for ${target.name}`);
+                    }}
+                    className="btn btn-secondary btn-sm"
+                    id="btn-download-target-legal-pack"
+                  >
+                    <FileText size={13} />
+                    <span>Download Legal Pack</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Target-specific legal cards or fallback */}
+              {targetLegalDocs.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {targetLegalDocs.map((doc) => (
+                    <div
+                      key={doc.id}
+                      style={{
+                        background: '#090d16',
+                        padding: '18px 20px',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border-subtle)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '12px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            color: 'var(--accent-cyan)',
+                            background: 'rgba(6, 182, 212, 0.12)',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                          }}>
+                            {doc.docNumber}
+                          </span>
+                          <span className="badge badge-purple">{doc.category}</span>
+                        </div>
+                        <span
+                          className="badge"
+                          style={{
+                            background: `${doc.statusColor}18`,
+                            color: doc.statusColor,
+                            borderColor: `${doc.statusColor}40`,
+                          }}
+                        >
+                          {doc.status}
+                        </span>
+                      </div>
+
+                      <div>
+                        <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff' }}>
+                          {doc.title}
+                        </h4>
+                        <p style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: 1.5, marginTop: '4px' }}>
+                          {doc.summary}
+                        </p>
+                      </div>
+
+                      {/* Key Terms */}
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                        gap: '8px',
+                      }}>
+                        {doc.keyTerms.map((t, idx) => (
+                          <div
+                            key={idx}
+                            style={{
+                              background: 'rgba(15, 23, 42, 0.8)',
+                              padding: '8px 12px',
+                              borderRadius: '6px',
+                              border: '1px solid rgba(255, 255, 255, 0.04)',
+                              fontSize: '0.75rem',
+                            }}
+                          >
+                            <span style={{ color: 'var(--text-subtle)', display: 'block', fontSize: '0.7rem' }}>{t.label}</span>
+                            <span style={{ color: '#f8fafc', fontWeight: 600 }}>{t.value}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        fontSize: '0.75rem',
+                        color: 'var(--text-subtle)',
+                        borderTop: '1px solid var(--border-subtle)',
+                        paddingTop: '10px',
+                        flexWrap: 'wrap',
+                        gap: '8px',
+                      }}>
+                        <div>
+                          <strong>Counsel: </strong>{doc.counselOfRecord} • <strong>Law: </strong>{doc.governingLaw}
+                        </div>
+                        <button
+                          onClick={() => {
+                            downloadTextFile(generateLegalAgreementMarkdown(doc), `${doc.docNumber}.md`, 'text/markdown');
+                            showToast('success', 'Document Downloaded', `Exported ${doc.docNumber}`);
+                          }}
+                          className="btn btn-secondary btn-sm"
+                        >
+                          <FileText size={12} />
+                          <span>Export Agreement (.md)</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{
+                  padding: '30px',
+                  background: '#090d16',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px dashed var(--border-subtle)',
+                  textAlign: 'center',
+                }}>
+                  <Scale size={28} color="var(--text-subtle)" style={{ marginBottom: '8px' }} />
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#ffffff' }}>
+                    Preliminary Confidentiality & MNDA In Progress
+                  </h4>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px', maxWidth: '500px', margin: '4px auto 16px' }}>
+                    Target is currently in early screening. Standard bilateral MNDA with 36-month trade secret survival is pre-drafted in the platform Legal Vault.
+                  </p>
+                  <button
+                    onClick={() => {
+                      const doc = {
+                        docNumber: `MNDA-${target.codeName.toUpperCase()}-2026`,
+                        title: `Bilateral Mutual NDA // ${target.name}`,
+                        targetName: target.name,
+                        codeName: target.codeName,
+                        category: 'Confidentiality & NDA',
+                        counselOfRecord: 'In-House Legal Counsel',
+                        governingLaw: 'State of Delaware',
+                        lastUpdated: new Date().toISOString().slice(0, 10),
+                        effectiveDate: 'Pre-Draft Ready',
+                        summary: `Mutual Non-Disclosure Agreement for preliminary evaluations of ${target.name}.`,
+                        keyTerms: [
+                          { label: 'Term', value: '36 Months from execution' },
+                          { label: 'Jurisdiction', value: 'Delaware Chancery Court' }
+                        ],
+                        clauses: [
+                          { section: 'Section 1', title: 'Scope', content: 'Protects proprietary algorithms, models, and financial books.' }
+                        ],
+                        signatures: [
+                          { role: 'Acquirer', entity: 'APEX', signatory: 'Marcus Vance', status: 'Signed' },
+                          { role: 'Target', entity: target.name, signatory: 'Authorized Officer', status: 'Pending Sign-off' }
+                        ]
+                      };
+                      downloadTextFile(generateLegalAgreementMarkdown(doc), `${doc.docNumber}.md`, 'text/markdown');
+                      showToast('success', 'MNDA Template Downloaded', `Generated standard MNDA for ${target.name}`);
+                    }}
+                    className="btn btn-primary btn-sm"
+                  >
+                    <span>Download Pre-Drafted MNDA Template</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Statutory Due Diligence Checklist */}
+              <div style={{
+                background: '#090d16',
+                padding: '18px 20px',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-subtle)',
+              }}>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ffffff', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <ShieldCheck size={16} color="var(--accent-emerald)" />
+                  Statutory M&A Closing & Diligence Checklist
+                </h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                    <CheckCircle2 size={15} color="var(--accent-emerald)" />
+                    <span>HSR Antitrust Safe Harbor Analysis</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                    <CheckCircle2 size={15} color="var(--accent-emerald)" />
+                    <span>IP Patent Chain of Title Verified ({target.patentsCount} Patents)</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                    <CheckCircle2 size={15} color="var(--accent-emerald)" />
+                    <span>Zero Copyleft GPL/AGPL Contamination</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                    <CheckCircle2 size={15} color="var(--accent-emerald)" />
+                    <span>R&W Insurance 1.0% Retention Cap</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: IC MEMO TEASER */}
           {activeTab === 'ic-memo' && (
             <ICMemoTeaser target={target} />
           )}

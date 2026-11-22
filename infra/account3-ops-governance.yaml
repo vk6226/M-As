@@ -1,0 +1,205 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AURA M&A Platform - Account 3: Pipelines, Governance & Observability (Step Functions, SQS, EventBridge, SNS, Secrets Manager, CloudWatch, Budgets)'
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: 'aura-mna'
+    Description: 'Resource naming prefix'
+  AdminAlertEmail:
+    Type: String
+    Default: 'deals@auramna.internal'
+    Description: 'Email address for M&A deal alerts and $80 credit alarms'
+  BudgetLimitUSD:
+    Type: Number
+    Default: 80
+    Description: 'Credit safety limit in USD (triggers alert before $100 credit expires)'
+
+Resources:
+  # ============================================================================
+  # 1. Amazon SNS - Dealflow Milestone & High-Priority Deal Alerts
+  # ============================================================================
+  DealAlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub '${ProjectName}-deal-alerts'
+      DisplayName: 'AURA M&A Dealflow Notifications'
+
+  DealAlertsEmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref DealAlertsTopic
+      Protocol: email
+      Endpoint: !Ref AdminAlertEmail
+
+  # ============================================================================
+  # 2. Amazon SQS - CIM Ingestion & OCR Processing Queue
+  # ============================================================================
+  CimIngestionDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub '${ProjectName}-cim-ingestion-dlq'
+      MessageRetentionPeriod: 1209600 # 14 days
+
+  CimIngestionQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub '${ProjectName}-cim-ingestion-queue'
+      VisibilityTimeout: 300
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt CimIngestionDeadLetterQueue.Arn
+        maxReceiveCount: 3
+
+  # ============================================================================
+  # 3. AWS Step Functions - Due Diligence State Machine Orchestrator
+  # ============================================================================
+  StepFunctionsExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-step-functions-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [states.amazonaws.com]
+            Action: ['sts:AssumeRole']
+      Policies:
+        - PolicyName: SfnOrchestrationPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref DealAlertsTopic
+              - Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource: !GetAtt CimIngestionQueue.Arn
+
+  DueDiligenceStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: !Sub '${ProjectName}-due-diligence-orchestrator'
+      RoleArn: !GetAtt StepFunctionsExecutionRole.Arn
+      DefinitionString: !Sub |
+        {
+          "Comment": "AURA M&A Multi-Stage Target Underwriting State Machine",
+          "StartAt": "ReceiveCimDocument",
+          "States": {
+            "ReceiveCimDocument": {
+              "Type": "Pass",
+              "Result": { "status": "CIM_RECEIVED" },
+              "Next": "ProcessFinancialTables"
+            },
+            "ProcessFinancialTables": {
+              "Type": "Pass",
+              "Result": { "ocrCompleted": true },
+              "Next": "NotifyDealTeam"
+            },
+            "NotifyDealTeam": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::sns:publish",
+              "Parameters": {
+                "TopicArn": "${DealAlertsTopic}",
+                "Subject": "AURA M&A: New Target Diligence Dossier Ready",
+                "Message": "Financial teardown and valuation model processed successfully."
+              },
+              "End": true
+            }
+          }
+        }
+
+  # ============================================================================
+  # 4. Amazon EventBridge - Daily Market Check Cron Rule
+  # ============================================================================
+  DailyMarketCheckRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub '${ProjectName}-daily-market-cron'
+      Description: 'Triggers daily market multiple updates & SEC EDGAR scans'
+      ScheduleExpression: 'cron(0 6 * * ? *)' # 6 AM UTC every day
+      State: ENABLED
+      Targets:
+        - Arn: !Ref DealAlertsTopic
+          Id: 'DailyAlertNotification'
+          Input: '{"source": "AURA M&A", "action": "Daily Market Check Triggered"}'
+
+  # ============================================================================
+  # 5. AWS Secrets Manager - Third-Party Financial API Credentials
+  # ============================================================================
+  SecEdgarApiSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${ProjectName}/financial-apis/sec-edgar'
+      Description: 'API credentials for SEC EDGAR and financial feeds'
+      SecretString: '{"api_key": "DEMO_KEY_CONFIGURED", "user_agent": "AuraMNA Intelligence deals@auramna.internal"}'
+
+  # ============================================================================
+  # 6. Amazon CloudWatch - Centralized Logging & Error Alarms
+  # ============================================================================
+  CentralLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/aura-mna/central-audit'
+      RetentionInDays: 14
+
+  PipelineErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectName}-pipeline-dlq-errors'
+      AlarmDescription: 'Triggers if documents fail OCR/ingestion in DLQ'
+      MetricName: ApproximateNumberOfMessagesVisible
+      Namespace: AWS/SQS
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt CimIngestionDeadLetterQueue.QueueName
+      AlarmActions:
+        - !Ref DealAlertsTopic
+
+  # ============================================================================
+  # 7. AWS Budgets - $80 Credit Protection Kill-Switch
+  # ============================================================================
+  CreditProtectionBudget:
+    Type: AWS::Budgets::Budget
+    Properties:
+      Budget:
+        BudgetName: !Sub '${ProjectName}-credit-safety-budget'
+        BudgetType: COST
+        TimeUnit: MONTHLY
+        BudgetLimit:
+          Amount: !Ref BudgetLimitUSD
+          Unit: USD
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 80
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref AdminAlertEmail
+
+Outputs:
+  DealAlertsTopicArn:
+    Description: 'SNS Deal Alerts Topic ARN'
+    Value: !Ref DealAlertsTopic
+    Export:
+      Name: !Sub '${ProjectName}-DealAlertsTopicArn'
+  CimQueueUrl:
+    Description: 'SQS CIM Ingestion Queue URL'
+    Value: !Ref CimIngestionQueue
+  StateMachineArn:
+    Description: 'Step Functions Due Diligence State Machine ARN'
+    Value: !Ref DueDiligenceStateMachine
+  LogGroupArn:
+    Description: 'Central CloudWatch Log Group ARN'
+    Value: !GetAtt CentralLogGroup.Arn

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # AURA M&A Intelligence Platform - Automated AWS Deployment Script
-# Provisions S3 Bucket + CloudFront CDN + Syncs Production Build
+# Provisions Full 20-Service Serverless Stack + S3 + CloudFront CDN
 # ==============================================================================
 
 set -e
@@ -14,7 +14,6 @@ echo "=========================================================="
 # Check for AWS CLI
 if ! command -v aws &> /dev/null; then
     echo "❌ Error: AWS CLI is not installed or not in your PATH."
-    echo "   Please install it via: brew install awscli (Mac) or https://aws.amazon.com/cli/"
     exit 1
 fi
 
@@ -22,7 +21,6 @@ fi
 echo "🔍 Checking AWS Credentials..."
 if ! aws sts get-caller-identity &> /dev/null; then
     echo "❌ Error: AWS credentials not configured or expired."
-    echo "   Run 'aws configure' to set up your AWS Access Key, Secret Key, and Region."
     exit 1
 fi
 
@@ -30,8 +28,10 @@ ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 DEFAULT_REGION="us-east-1"
 REGION="${AWS_DEFAULT_REGION:-$DEFAULT_REGION}"
 STACK_NAME="aura-mna-platform-stack"
+ALERT_EMAIL="${1:-deals@auramna.internal}"
 
 echo "✅ Authenticated to AWS Account: $ACCOUNT_ID (Region: $REGION)"
+echo "   Alert & Credit Guard Email: $ALERT_EMAIL"
 
 # Step 1: Build production app
 echo ""
@@ -47,13 +47,13 @@ echo "✅ Build completed successfully in ./dist"
 # Step 2: Deploy CloudFormation Stack
 echo ""
 echo "🚀 Step 2: Deploying CloudFormation Stack ($STACK_NAME)..."
-echo "   (This provisions S3, CloudFront OAC, and Global CDN if not already created)"
+echo "   (Provisions 20 Serverless Services: S3, CloudFront, DynamoDB, Lambda, Cognito, Step Functions, SQS, KMS, SNS, EventBridge, CloudWatch, Budgets)"
 
 aws cloudformation deploy \
     --template-file cloudformation-template.yaml \
     --stack-name "$STACK_NAME" \
-    --parameter-overrides BucketNamePrefix="aura-mna" \
-    --capabilities CAPABILITY_IAM \
+    --parameter-overrides ProjectName="aura-mna" AdminAlertEmail="$ALERT_EMAIL" \
+    --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
     --region "$REGION"
 
 # Get outputs from CloudFormation
@@ -79,12 +79,15 @@ aws s3 cp dist/index.html "s3://$BUCKET_NAME/index.html" \
 
 echo "✅ S3 sync finished."
 
-# Step 4: Invalidate CloudFront Cache
-echo ""
-echo "🔄 Step 4: Invalidating CloudFront edge cache..."
-aws cloudfront create-invalidation \
-    --distribution-id "$CF_DIST_ID" \
-    --paths "/*" > /dev/null
+# Step 4: Invalidate CloudFront Cache (if enabled)
+if [ -n "$CF_DIST_ID" ] && [ "$CF_DIST_ID" != "None" ]; then
+    echo ""
+    echo "🔄 Step 4: Invalidating CloudFront edge cache ($CF_DIST_ID)..."
+    aws cloudfront create-invalidation --distribution-id "$CF_DIST_ID" --paths "/*" > /dev/null || true
+else
+    echo ""
+    echo "ℹ️ Serving directly via high-speed S3 Website endpoint."
+fi
 
 echo "=========================================================="
 echo "🎉 DEPLOYMENT COMPLETE!"

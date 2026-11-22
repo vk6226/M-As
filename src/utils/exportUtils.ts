@@ -120,3 +120,57 @@ export function exportTargetsCsv(targets: TargetCompany[]): void {
   const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
   downloadTextFile(csvContent, `M&A_Target_Discovery_Export_${new Date().toISOString().slice(0, 10)}.csv`, 'text/csv');
 }
+
+export function generateLegalAgreementMarkdown(doc: {
+  docNumber: string;
+  title: string;
+  targetName: string;
+  codeName: string;
+  category: string;
+  counselOfRecord: string;
+  governingLaw: string;
+  lastUpdated: string;
+  effectiveDate: string;
+  summary: string;
+  keyTerms: { label: string; value: string }[];
+  clauses: { section: string; title: string; content: string }[];
+  signatures: { role: string; entity: string; signatory: string; status: string; signedAt?: string }[];
+}): string {
+  return `# ${doc.title.toUpperCase()}
+**TRANSACTION INSTRUMENT REF:** ${doc.docNumber}
+**TARGET ASSET:** ${doc.targetName} (${doc.codeName})
+**JURISDICTION & GOVERNING LAW:** ${doc.governingLaw}
+**COUNSEL OF RECORD:** ${doc.counselOfRecord}
+**EFFECTIVE STATUS:** ${doc.effectiveDate}
+
+---
+
+## 1. PREAMBLE & TRANSACTION SUMMARY
+${doc.summary}
+
+---
+
+## 2. KEY COMMERCIAL & LEGAL COVENANTS
+${doc.keyTerms.map((t) => `- **${t.label}:** ${t.value}`).join('\n')}
+
+---
+
+## 3. DEFINITIVE CLAUSES & STATUTORY RECITALS
+${doc.clauses.map((c) => `### ${c.section} — ${c.title}
+${c.content}
+`).join('\n')}
+
+---
+
+## 4. EXECUTION & COUNTERPARTY SIGNATURE ATTESTATION
+${doc.signatures.map((s) => `### [${s.status.toUpperCase()}] ${s.role}
+- **Entity:** ${s.entity}
+- **Authorized Signatory:** ${s.signatory}
+- **Attestation Timestamp:** ${s.signedAt || 'Pending formal closing execution'}
+`).join('\n')}
+
+---
+*AURA M&A™ Legal Governance Engine · SOC-2 Type II Certified Transaction Vault*
+`;
+}
+

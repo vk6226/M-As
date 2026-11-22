@@ -2,6 +2,7 @@ import React from 'react';
 import { useDealflow } from '../../context/DealflowContext';
 import { TargetCard } from '../screener/TargetCard';
 import { MetricRibbon } from '../layout/MetricRibbon';
+import { LegalDocumentationSection } from './LegalDocumentationSection';
 import { formatCurrency, formatPercent } from '../../utils/financialFormulas';
 import { 
   Radar, 
@@ -13,7 +14,8 @@ import {
   Building2, 
   Compass, 
   AlertCircle,
-  Cloud 
+  Cloud,
+  Scale
 } from 'lucide-react';
 
 export const DealOverviewDashboard: React.FC = () => {
@@ -90,10 +92,33 @@ export const DealOverviewDashboard: React.FC = () => {
         >
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
             <div style={{ maxWidth: '900px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                <span className="badge badge-cyan">Inorganic Growth Radar</span>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-subtle)' }}>•</span>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>M&A Investment Thesis v2026.4</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span className="badge badge-cyan">Inorganic Growth Radar</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-subtle)' }}>•</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>M&A Investment Thesis v2026.4</span>
+                </div>
+                <a
+                  href="#legal-documentation-section"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '0.75rem',
+                    color: 'var(--accent-cyan)',
+                    background: 'rgba(6, 182, 212, 0.12)',
+                    padding: '3px 10px',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(6, 182, 212, 0.3)',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    transition: 'all 0.2s',
+                  }}
+                  id="link-jump-legal-vault"
+                >
+                  <Scale size={13} />
+                  <span>Legal & Regulatory Vault (8)</span>
+                </a>
               </div>
               <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ffffff', marginBottom: '10px' }}>
                 {acquirer.name} Precision M&A Mandate
@@ -254,6 +279,9 @@ export const DealOverviewDashboard: React.FC = () => {
             ))}
           </div>
         </div>
+
+        {/* Legal Documentation & Transaction Governance Vault */}
+        <LegalDocumentationSection />
       </div>
     </div>
   );

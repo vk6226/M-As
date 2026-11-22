@@ -1,0 +1,319 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AURA M&A Platform - Account 2: Core Deal Engine, Database & GenAI (API Gateway, Lambda, DynamoDB, Bedrock, Textract, KMS, VDR)'
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: 'aura-mna'
+    Description: 'Resource naming prefix'
+  CognitoUserPoolArn:
+    Type: String
+    Default: ''
+    Description: 'Cognito User Pool ARN from Account 1 (optional for auth validation)'
+  Account3Id:
+    Type: String
+    Default: ''
+    Description: 'AWS Account 3 ID (for cross-account EventBridge / SQS / SNS permissions)'
+
+Conditions:
+  HasCognitoAuth: !Not [!Equals [!Ref CognitoUserPoolArn, '']]
+  HasAccount3: !Not [!Equals [!Ref Account3Id, '']]
+
+Resources:
+  # ============================================================================
+  # 1. AWS KMS - Customer Managed Encryption Key (CMEK)
+  # ============================================================================
+  DealDataKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: 'KMS Key for confidential M&A Virtual Data Room and DynamoDB tables'
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: EnableRootAccess
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+          - Sid: AllowLambdaAccess
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt LambdaExecutionRole.Arn
+            Action:
+              - 'kms:Encrypt'
+              - 'kms:Decrypt'
+              - 'kms:ReEncrypt*'
+              - 'kms:GenerateDataKey*'
+              - 'kms:DescribeKey'
+            Resource: '*'
+
+  DealDataKmsAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/${ProjectName}-deal-key'
+      TargetKeyId: !Ref DealDataKmsKey
+
+  # ============================================================================
+  # 2. Amazon S3 - Virtual Data Room (VDR) & Confidential Documents Store
+  # ============================================================================
+  VirtualDataRoomBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${ProjectName}-vdr-${AWS::AccountId}-${AWS::Region}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+              KMSMasterKeyId: !Ref DealDataKmsKey
+      LifecycleConfiguration:
+        Rules:
+          - Id: ArchiveOldCIMsToGlacier
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: 90
+                StorageClass: GLACIER
+
+  # ============================================================================
+  # 3. Amazon DynamoDB - Target Records & Pipeline Deals (On-Demand / $0 Idle)
+  # ============================================================================
+  TargetsMasterTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${ProjectName}-targets'
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !Ref DealDataKmsKey
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: sector
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: SectorIndex
+          KeySchema:
+            - AttributeName: sector
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  PipelineDealsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${ProjectName}-pipeline-deals'
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !Ref DealDataKmsKey
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: stage
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: StageIndex
+          KeySchema:
+            - AttributeName: stage
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  # ============================================================================
+  # 4. AWS Lambda - M&A Underwriting & Scoring Engine
+  # ============================================================================
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-core-engine-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [lambda.amazonaws.com]
+            Action: ['sts:AssumeRole']
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: CoreDealEnginePermissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource:
+                  - !GetAtt TargetsMasterTable.Arn
+                  - !Sub '${TargetsMasterTable.Arn}/index/*'
+                  - !GetAtt PipelineDealsTable.Arn
+                  - !Sub '${PipelineDealsTable.Arn}/index/*'
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt VirtualDataRoomBucket.Arn
+                  - !Sub '${VirtualDataRoomBucket.Arn}/*'
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:InvokeModelWithResponseStream
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - textract:DetectDocumentText
+                  - textract:AnalyzeDocument
+                Resource: '*'
+
+  MnaEngineLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${ProjectName}-core-engine'
+      Runtime: python3.11
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 60
+      MemorySize: 512
+      Environment:
+        Variables:
+          TARGETS_TABLE: !Ref TargetsMasterTable
+          PIPELINE_TABLE: !Ref PipelineDealsTable
+          VDR_BUCKET: !Ref VirtualDataRoomBucket
+      Code:
+        ZipFile: |
+          import json, os, boto3
+          dynamodb = boto3.resource('dynamodb')
+          def handler(event, context):
+              return {
+                  'statusCode': 200,
+                  'headers': {
+                      'Content-Type': 'application/json',
+                      'Access-Control-Allow-Origin': '*',
+                      'Access-Control-Allow-Headers': 'Content-Type,Authorization'
+                  },
+                  'body': json.dumps({'status': 'online', 'service': 'AURA M&A Core Intelligence Engine v3.4'})
+              }
+
+  # ============================================================================
+  # 5. Amazon API Gateway - REST API
+  # ============================================================================
+  ApiGatewayRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub '${ProjectName}-core-api'
+      Description: 'AURA M&A Core Deal Intelligence REST API'
+
+  ApiGatewayAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Condition: HasCognitoAuth
+    Properties:
+      Name: CognitoUserAuthorizer
+      Type: COGNITO_USER_POOLS
+      IdentitySource: method.request.header.Authorization
+      RestApiId: !Ref ApiGatewayRestApi
+      ProviderARNs:
+        - !Ref CognitoUserPoolArn
+
+  TargetsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: 'targets'
+      RestApiId: !Ref ApiGatewayRestApi
+
+  TargetsGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref TargetsResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MnaEngineLambda.Arn}/invocations'
+
+  TargetsOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref TargetsResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: [TargetsGetMethod, TargetsOptionsMethod]
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      StageName: prod
+
+  LambdaApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt MnaEngineLambda.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub '${ApiGatewayRestApi.Arn}/*/*/*'
+
+Outputs:
+  ApiEndpoint:
+    Description: 'Core REST API Gateway Endpoint URL'
+    Value: !Sub 'https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod'
+    Export:
+      Name: !Sub '${ProjectName}-ApiEndpoint'
+  TargetsTableName:
+    Description: 'DynamoDB Targets Table Name'
+    Value: !Ref TargetsMasterTable
+  PipelineTableName:
+    Description: 'DynamoDB Pipeline Deals Table Name'
+    Value: !Ref PipelineDealsTable
+  VdrBucketName:
+    Description: 'Virtual Data Room S3 Bucket'
+    Value: !Ref VirtualDataRoomBucket
+  LambdaFunctionArn:
+    Description: 'Core Engine Lambda Function ARN'
+    Value: !GetAtt MnaEngineLambda.Arn
+  KmsKeyArn:
+    Description: 'Customer Managed KMS Key ARN'
+    Value: !GetAtt DealDataKmsKey.Arn
