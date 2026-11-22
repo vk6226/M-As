@@ -44,11 +44,11 @@ export const ICMemoTeaser: React.FC<ICMemoTeaserProps> = ({ target }) => {
         <head>
           <title>IC Memorandum - ${target.codeName} - ${target.name}</title>
           <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; padding: 40px; color: #1e293b; }
-            h1 { color: #0f172a; border-bottom: 2px solid #0284c7; padding-bottom: 8px; }
-            h2 { color: #0369a1; margin-top: 24px; }
-            pre { background: #f8fafc; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; }
-            .badge { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; padding: 40px; color: var(--bg-tertiary); }
+            h1 { color: var(--bg-secondary); border-bottom: 2px solid var(--accent-strong); padding-bottom: 8px; }
+            h2 { color: var(--accent-strong); margin-top: 24px; }
+            pre { background: var(--text-main); padding: 16px; border: 1px solid var(--text-soft); border-radius: 8px; }
+            .badge { display: inline-block; background: var(--text-main); color: var(--accent-strong); padding: 4px 8px; border-radius: 4px; font-weight: bold; }
           </style>
         </head>
         <body>
@@ -69,7 +69,7 @@ export const ICMemoTeaser: React.FC<ICMemoTeaserProps> = ({ target }) => {
         justifyContent: 'space-between',
         flexWrap: 'wrap',
         gap: '12px',
-        background: 'rgba(15, 23, 42, 0.7)',
+        background: 'rgba(var(--surface-rgb), 0.7)',
         padding: '14px 20px',
         borderRadius: 'var(--radius-md)',
         border: '1px solid var(--border-subtle)',
@@ -77,7 +77,7 @@ export const ICMemoTeaser: React.FC<ICMemoTeaserProps> = ({ target }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <FileText size={18} style={{ color: 'var(--accent-cyan)' }} />
           <div>
-            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#ffffff' }}>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-strong)' }}>
               Preliminary IC Memorandum // {target.codeName.toUpperCase()}
             </h4>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -92,7 +92,7 @@ export const ICMemoTeaser: React.FC<ICMemoTeaserProps> = ({ target }) => {
             className="btn btn-secondary btn-sm"
             id="btn-copy-ic-memo"
           >
-            {copied ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
+            {copied ? <Check size={13} color="var(--emerald)" /> : <Copy size={13} />}
             <span>{copied ? 'Copied' : 'Copy Markdown'}</span>
           </button>
 
@@ -118,7 +118,7 @@ export const ICMemoTeaser: React.FC<ICMemoTeaserProps> = ({ target }) => {
 
       {/* Styled Rendered Preview Container */}
       <div style={{
-        background: '#090d16',
+        background: 'var(--bg-primary)',
         borderRadius: 'var(--radius-lg)',
         border: '1px solid var(--border-subtle)',
         padding: '28px',
@@ -127,7 +127,7 @@ export const ICMemoTeaser: React.FC<ICMemoTeaserProps> = ({ target }) => {
         fontFamily: 'var(--font-mono)',
         fontSize: '0.8rem',
         lineHeight: 1.6,
-        color: '#e2e8f0',
+        color: 'var(--text-soft)',
         whiteSpace: 'pre-wrap',
         boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.5)',
       }}>

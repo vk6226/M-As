@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useDealflow } from '../../context/DealflowContext';
+import { Segmented } from '../ui/primitives';
 import { TargetCompany, Sector, OwnershipType, DealReadiness } from '../../types/mna';
 import { 
   X, 
@@ -185,8 +186,8 @@ export const AddTargetModal: React.FC = () => {
           description: 'Bundle into flagship customer accounts.',
         },
       ],
-      logoColor: '#3b82f6',
-      logoAccent: '#60a5fa',
+      logoColor: 'var(--accent)',
+      logoAccent: 'var(--accent)',
     };
 
     addTarget(newTarget);
@@ -285,8 +286,8 @@ export const AddTargetModal: React.FC = () => {
             ],
             risks: [],
             synergies: [],
-            logoColor: '#10b981',
-            logoAccent: '#34d399',
+            logoColor: 'var(--emerald)',
+            logoAccent: 'var(--emerald)',
           });
         }
 
@@ -327,139 +328,57 @@ export const AddTargetModal: React.FC = () => {
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth: '920px', maxHeight: '92vh' }}
       >
-        {/* Modal Header */}
-        <div style={{
-          padding: '20px 28px',
-          borderBottom: '1px solid var(--border-subtle)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: 'rgba(15, 23, 42, 0.95)',
-          borderTopLeftRadius: 'var(--radius-xl)',
-          borderTopRightRadius: 'var(--radius-xl)',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '10px',
-              background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-            }}>
-              <PlusCircle size={22} />
-            </div>
+        <div className="modal-head">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span className="panel__icon" style={{ width: 38, height: 38 }}><PlusCircle size={18} /></span>
             <div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Ingest & Discover New Target Companies</h2>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Add proprietary targets via AI URL Profiler, manual deal entry, bulk CSV import, or enterprise API feeds.
-              </p>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Add companies</h2>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Generate a profile with AI, enter one manually, or import a file.</p>
             </div>
           </div>
-
-          <button
-            onClick={() => setIsAddTargetOpen(false)}
-            style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: '8px',
-              padding: '6px',
-              color: 'var(--text-muted)',
-              cursor: 'pointer',
-            }}
-          >
-            <X size={18} />
+          <button className="icon-btn" onClick={() => setIsAddTargetOpen(false)} aria-label="Close">
+            <X size={16} />
           </button>
         </div>
 
-        {/* Navigation Tabs */}
-        <div style={{
-          display: 'flex',
-          gap: '8px',
-          padding: '12px 28px',
-          background: 'rgba(11, 17, 32, 0.8)',
-          borderBottom: '1px solid var(--border-subtle)',
-          overflowX: 'auto',
-        }}>
-          <button
-            onClick={() => setActiveTab('ai-profiler')}
-            className="btn btn-sm"
-            style={{
-              background: activeTab === 'ai-profiler' ? 'rgba(6, 182, 212, 0.2)' : 'transparent',
-              borderColor: activeTab === 'ai-profiler' ? 'var(--accent-cyan)' : 'transparent',
-              color: activeTab === 'ai-profiler' ? '#ffffff' : 'var(--text-muted)',
-            }}
-          >
-            <Sparkles size={14} color="var(--accent-cyan)" />
-            <span>AI Smart Target Profiler</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('manual')}
-            className="btn btn-sm"
-            style={{
-              background: activeTab === 'manual' ? 'rgba(16, 185, 129, 0.2)' : 'transparent',
-              borderColor: activeTab === 'manual' ? 'var(--accent-emerald)' : 'transparent',
-              color: activeTab === 'manual' ? '#ffffff' : 'var(--text-muted)',
-            }}
-          >
-            <PlusCircle size={14} color="var(--accent-emerald)" />
-            <span>Manual Deal Form</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('csv')}
-            className="btn btn-sm"
-            style={{
-              background: activeTab === 'csv' ? 'rgba(139, 92, 246, 0.2)' : 'transparent',
-              borderColor: activeTab === 'csv' ? 'var(--accent-violet)' : 'transparent',
-              color: activeTab === 'csv' ? '#ffffff' : 'var(--text-muted)',
-            }}
-          >
-            <Upload size={14} color="#c084fc" />
-            <span>Bulk CSV / JSON Import</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('api-feeds')}
-            className="btn btn-sm"
-            style={{
-              background: activeTab === 'api-feeds' ? 'rgba(245, 158, 11, 0.2)' : 'transparent',
-              borderColor: activeTab === 'api-feeds' ? 'var(--accent-amber)' : 'transparent',
-              color: activeTab === 'api-feeds' ? '#ffffff' : 'var(--text-muted)',
-            }}
-          >
-            <Database size={14} color="var(--accent-amber)" />
-            <span>How Production Feeds Work</span>
-          </button>
+        <div style={{ padding: '14px 28px', borderBottom: '1px solid var(--border-subtle)' }}>
+          <Segmented
+            value={activeTab}
+            onChange={setActiveTab}
+            layoutId="add-target-tabs"
+            size="sm"
+            options={[
+              { value: 'ai-profiler', label: 'AI profile', icon: <Sparkles size={14} /> },
+              { value: 'manual', label: 'Manual entry', icon: <PlusCircle size={14} /> },
+              { value: 'csv', label: 'CSV / JSON import', icon: <Upload size={14} /> },
+              { value: 'api-feeds', label: 'Data feeds', icon: <Database size={14} /> },
+            ]}
+          />
         </div>
 
         {/* Tab Content */}
-        <div style={{ padding: '28px', overflowY: 'auto' }}>
+        <div key={activeTab} className="tab-panel" style={{ padding: '28px', overflowY: 'auto' }}>
           {/* TAB 1: AI INSTANT COMPANY PROFILER */}
           {activeTab === 'ai-profiler' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div style={{
-                background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)',
+                background: 'linear-gradient(135deg, rgba(var(--accent-rgb), 0.1) 0%, rgba(var(--violet-rgb), 0.1) 100%)',
                 padding: '16px 20px',
                 borderRadius: 'var(--radius-md)',
-                border: '1px solid rgba(6, 182, 212, 0.3)',
+                border: '1px solid rgba(var(--accent-rgb), 0.3)',
               }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-strong)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Sparkles size={16} color="var(--accent-cyan)" />
-                  Instant M&A Dossier Synthesis
+                  Generate a company profile
                 </h4>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Enter any company name or domain (e.g. <em>Wiz, SentinelOne, Datadog, Brex, Ramp</em>, or any private startup). Our precision engine instantly calculates project code names, benchmark multiples, 5-year financials, risk matrix, and strategic synergy scorecards.
-                </p>
+                  Enter a company name or domain. AURA builds a code name, benchmark multiples, five-year financials, a risk matrix and a synergy scorecard.</p>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
                 <div>
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>
-                    Company Name or Web Domain *
+                    Company name or domain
                   </label>
                   <input
                     type="text"
@@ -470,7 +389,7 @@ export const AddTargetModal: React.FC = () => {
                   />
                   {/* Quick Real-World Presets */}
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>Quick Presets:</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>Examples</span>
                     {['OpenAI', 'Databricks', 'Palantir', 'Snowflake', 'Wiz', 'Stripe', 'Ramp', 'Anthropic', 'Figma', 'Canva', 'Razorpay', 'Mistral AI', 'Palo Alto', 'Datadog'].map((preset) => (
                       <button
                         key={preset}
@@ -500,7 +419,7 @@ export const AddTargetModal: React.FC = () => {
 
                 <div>
                   <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>
-                    Sector Vertical
+                    Sector
                   </label>
                   <select
                     value={aiSector}
@@ -520,7 +439,7 @@ export const AddTargetModal: React.FC = () => {
 
               <div>
                 <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)', display: 'block', marginBottom: '6px' }}>
-                  Product Offering or Value Proposition (Optional)
+                  Product or value proposition (optional)
                 </label>
                 <input
                   type="text"
@@ -533,7 +452,7 @@ export const AddTargetModal: React.FC = () => {
 
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '6px' }}>
-                  <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>Estimated Current ARR Scale ($M):</span>
+                  <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>Estimated ARR ($M)</span>
                   <span style={{ color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
                     ${aiArrEstimate}M ARR
                   </span>
@@ -558,7 +477,7 @@ export const AddTargetModal: React.FC = () => {
                   title="Batch generate 35+ market leaders across all sectors"
                 >
                   <Zap size={14} color="var(--accent-amber)" />
-                  <span>{isGenerating ? 'Synthesizing...' : '⚡ Ingest 35+ Worldwide Giants (All Sectors)'}</span>
+                  <span>{isGenerating ? 'Synthesizing...' : 'Load global benchmark set'}</span>
                 </button>
 
                 <button
@@ -568,7 +487,7 @@ export const AddTargetModal: React.FC = () => {
                   style={{ minWidth: '220px' }}
                 >
                   <Sparkles size={16} />
-                  <span>{isGenerating ? 'Synthesizing Dossier...' : 'Generate & Ingest Target'}</span>
+                  <span>{isGenerating ? 'Generating…' : 'Generate profile'}</span>
                 </button>
               </div>
             </div>
@@ -627,7 +546,7 @@ export const AddTargetModal: React.FC = () => {
 
               {/* Financial Metrics */}
               <div style={{
-                background: '#0b1120',
+                background: 'var(--bg-inset)',
                 padding: '16px',
                 borderRadius: 'var(--radius-md)',
                 display: 'grid',
@@ -737,7 +656,7 @@ export const AddTargetModal: React.FC = () => {
                 borderRadius: 'var(--radius-lg)',
                 padding: '40px 24px',
                 textAlign: 'center',
-                background: 'rgba(15, 23, 42, 0.4)',
+                background: 'rgba(var(--surface-rgb), 0.4)',
                 cursor: 'pointer',
                 position: 'relative',
               }}>
@@ -755,7 +674,7 @@ export const AddTargetModal: React.FC = () => {
                   }}
                 />
                 <Upload size={36} color="var(--accent-cyan)" style={{ margin: '0 auto 12px auto' }} />
-                <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-strong)' }}>
                   Upload Target Dataset (.CSV or .JSON)
                 </h4>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
@@ -767,14 +686,14 @@ export const AddTargetModal: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                background: '#0b1120',
+                background: 'var(--bg-inset)',
                 padding: '14px 18px',
                 borderRadius: 'var(--radius-md)',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <FileText size={18} color="var(--accent-emerald)" />
                   <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#ffffff' }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-strong)' }}>
                       Download Official M&A CSV Template
                     </div>
                     <div style={{ fontSize: '0.725rem', color: 'var(--text-subtle)' }}>
@@ -794,7 +713,7 @@ export const AddTargetModal: React.FC = () => {
           {/* TAB 4: PRODUCTION API FEEDS ARCHITECTURE */}
           {activeTab === 'api-feeds' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff' }}>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-strong)' }}>
                 How Real-World M&A Platforms Continuously Ingest Companies
               </h3>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
@@ -802,7 +721,7 @@ export const AddTargetModal: React.FC = () => {
               </p>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px' }}>
-                <div style={{ background: '#0b1120', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ background: 'var(--bg-inset)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-cyan)', fontWeight: 700, fontSize: '0.85rem' }}>
                     <Database size={16} />
                     1. Financial Market APIs
@@ -812,7 +731,7 @@ export const AddTargetModal: React.FC = () => {
                   </p>
                 </div>
 
-                <div style={{ background: '#0b1120', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ background: 'var(--bg-inset)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-emerald)', fontWeight: 700, fontSize: '0.85rem' }}>
                     <Globe size={16} />
                     2. Web Crawlers & AI Extraction
@@ -822,8 +741,8 @@ export const AddTargetModal: React.FC = () => {
                   </p>
                 </div>
 
-                <div style={{ background: '#0b1120', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#c084fc', fontWeight: 700, fontSize: '0.85rem' }}>
+                <div style={{ background: 'var(--bg-inset)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--violet)', fontWeight: 700, fontSize: '0.85rem' }}>
                     <Cpu size={16} />
                     3. Alternative Growth Signals
                   </div>
@@ -832,7 +751,7 @@ export const AddTargetModal: React.FC = () => {
                   </p>
                 </div>
 
-                <div style={{ background: '#0b1120', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+                <div style={{ background: 'var(--bg-inset)', padding: '16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-amber)', fontWeight: 700, fontSize: '0.85rem' }}>
                     <Layers size={16} />
                     4. Deal Room & Broker Integrations
@@ -844,12 +763,12 @@ export const AddTargetModal: React.FC = () => {
               </div>
 
               <div style={{
-                background: 'rgba(6, 182, 212, 0.08)',
-                border: '1px solid rgba(6, 182, 212, 0.25)',
+                background: 'rgba(var(--accent-rgb), 0.08)',
+                border: '1px solid rgba(var(--accent-rgb), 0.25)',
                 padding: '14px 18px',
                 borderRadius: 'var(--radius-md)',
                 fontSize: '0.8rem',
-                color: '#e2e8f0',
+                color: 'var(--text-soft)',
               }}>
                 <strong style={{ color: 'var(--accent-cyan)' }}>AWS Cloud Pipeline: </strong>
                 When hosted on AWS, you can configure an <strong>AWS Lambda function + Amazon API Gateway</strong> endpoint (`/api/targets/webhook`) that automatically receives inbound companies from any webhook and writes them into Amazon DynamoDB or S3.

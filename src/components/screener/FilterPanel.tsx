@@ -1,9 +1,10 @@
 import React from 'react';
+import { motion } from 'motion/react';
+import { Search, RotateCcw, Check } from 'lucide-react';
 import { useDealflow } from '../../context/DealflowContext';
-import { Sector } from '../../types/mna';
-import { Search, RotateCcw, Filter, SlidersHorizontal, Check } from 'lucide-react';
+import type { Sector, ScreenerFilterState } from '../../types/mna';
 
-const ALL_SECTORS: Sector[] = [
+export const ALL_SECTORS: Sector[] = [
   'Enterprise AI',
   'Cybersecurity',
   'FinTech & Payments',
@@ -13,269 +14,129 @@ const ALL_SECTORS: Sector[] = [
   'DevOps & Cloud Infra',
 ];
 
+const REGIONS = ['North America', 'EMEA', 'APAC', 'LATAM'] as const;
+type Region = (typeof REGIONS)[number];
+
+type NumericKey = 'minArr' | 'minRevenueGrowth' | 'minRuleOf40' | 'maxEvArr' | 'minStrategicFit';
+
+const RANGES: { key: NumericKey; label: string; min: number; max: number; step: number; fmt: (v: number) => string }[] = [
+  { key: 'minArr', label: 'Minimum ARR', min: 0, max: 60, step: 5, fmt: (v) => `$${v}M+` },
+  { key: 'minRevenueGrowth', label: 'Minimum YoY growth', min: 0, max: 80, step: 5, fmt: (v) => `${v}%+` },
+  { key: 'minRuleOf40', label: 'Minimum Rule of 40', min: 0, max: 80, step: 5, fmt: (v) => `${v}+` },
+  { key: 'maxEvArr', label: 'Maximum EV / ARR', min: 5, max: 20, step: 0.5, fmt: (v) => `${v}x` },
+  { key: 'minStrategicFit', label: 'Minimum strategic fit', min: 0, max: 95, step: 5, fmt: (v) => `${v}` },
+];
+
+const DEFAULTS: Partial<ScreenerFilterState> = { minArr: 0, minRevenueGrowth: 0, minRuleOf40: 0, maxEvArr: 20, minStrategicFit: 0 };
+
 export const FilterPanel: React.FC = () => {
   const { filterState, setFilterState, resetFilters, targets } = useDealflow();
 
-  const handleSectorToggle = (sector: Sector) => {
-    setFilterState((prev) => {
-      const exists = prev.sectors.includes(sector);
-      return {
-        ...prev,
-        sectors: exists
-          ? prev.sectors.filter((s) => s !== sector)
-          : [...prev.sectors, sector],
-      };
-    });
-  };
+  const toggleSector = (sector: Sector) =>
+    setFilterState((prev) => ({
+      ...prev,
+      sectors: prev.sectors.includes(sector) ? prev.sectors.filter((s) => s !== sector) : [...prev.sectors, sector],
+    }));
 
-  const handleRegionToggle = (region: 'North America' | 'EMEA' | 'APAC' | 'LATAM') => {
-    setFilterState((prev) => {
-      const exists = prev.regions.includes(region);
-      return {
-        ...prev,
-        regions: exists
-          ? prev.regions.filter((r) => r !== region)
-          : [...prev.regions, region],
-      };
-    });
-  };
+  const toggleRegion = (region: Region) =>
+    setFilterState((prev) => ({
+      ...prev,
+      regions: prev.regions.includes(region) ? prev.regions.filter((r) => r !== region) : [...prev.regions, region],
+    }));
+
+  const activeCount =
+    filterState.sectors.length +
+    filterState.regions.length +
+    (filterState.searchQuery.trim() ? 1 : 0) +
+    RANGES.filter((r) => filterState[r.key] !== DEFAULTS[r.key]).length;
 
   return (
-    <div
-      className="glass-panel"
-      style={{
-        padding: '20px',
-        marginBottom: '24px',
-        borderRadius: 'var(--radius-lg)',
-      }}
-    >
-      {/* Top row: Search input + Quick Reset */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '16px',
-        marginBottom: '20px',
-        flexWrap: 'wrap',
-      }}>
-        {/* Search Bar */}
-        <div style={{
-          position: 'relative',
-          flex: '1',
-          minWidth: '280px',
-        }}>
-          <Search
-            size={16}
-            style={{
-              position: 'absolute',
-              left: '14px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: 'var(--text-subtle)',
-            }}
-          />
+    <aside className="glass-panel filter-rail" style={{ padding: 18 }} aria-label="Filters" data-no-reveal>
+      <div className="filter-rail__section">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Filters</h3>
+            {activeCount > 0 && (
+              <motion.span
+                key={activeCount}
+                initial={{ scale: 0.6 }}
+                animate={{ scale: 1 }}
+                className="badge badge-cyan"
+                style={{ height: 20, padding: '0 7px' }}
+              >
+                {activeCount}
+              </motion.span>
+            )}
+          </div>
+          <button className="btn btn-ghost btn-sm" onClick={resetFilters} disabled={activeCount === 0} style={{ height: 28 }}>
+            <RotateCcw size={13} /> Reset
+          </button>
+        </div>
+        <label className="search-field" style={{ display: 'block' }}>
+          <Search size={15} />
           <input
             type="text"
-            id="input-target-search"
-            placeholder="Search targets by name, M&A code, tech stack (e.g. eBPF, Rust, AI agents), or sub-sector..."
+            className="input-text"
+            placeholder="Name, project, tech stack…"
             value={filterState.searchQuery}
             onChange={(e) => setFilterState((prev) => ({ ...prev, searchQuery: e.target.value }))}
-            className="input-text"
-            style={{ paddingLeft: '40px' }}
+            id="input-screener-search"
           />
-        </div>
-
-        {/* Reset Filters */}
-        <button
-          onClick={resetFilters}
-          id="btn-reset-filters"
-          className="btn btn-secondary btn-sm"
-          title="Reset all filters to defaults"
-        >
-          <RotateCcw size={13} />
-          <span>Reset Filters</span>
-        </button>
+        </label>
       </div>
 
-      {/* Sector Selection Chips */}
-      <div style={{ marginBottom: '18px' }}>
-        <div style={{
-          fontSize: '0.75rem',
-          color: 'var(--text-muted)',
-          fontWeight: 600,
-          textTransform: 'uppercase',
-          letterSpacing: '0.04em',
-          marginBottom: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-        }}>
-          <Filter size={12} style={{ color: 'var(--accent-cyan)' }} />
-          <span>Industry Sector Focus:</span>
-        </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-          {ALL_SECTORS.map((sector) => {
-            const isSelected = filterState.sectors.includes(sector);
-            return (
-              <button
-                key={sector}
-                onClick={() => handleSectorToggle(sector)}
-                style={{
-                  padding: '5px 12px',
-                  borderRadius: '20px',
-                  fontSize: '0.78rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  border: isSelected ? '1px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
-                  background: isSelected ? 'rgba(6, 182, 212, 0.2)' : 'rgba(255, 255, 255, 0.03)',
-                  color: isSelected ? '#ffffff' : 'var(--text-muted)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                {isSelected && <Check size={12} color="var(--accent-cyan)" />}
-                <span>{sector}</span>
-              </button>
-            );
-          })}
+      <div className="filter-rail__section">
+        <div className="filter-rail__label">Sector</div>
+        {ALL_SECTORS.map((sector) => {
+          const checked = filterState.sectors.includes(sector);
+          const count = targets.filter((t) => t.sector === sector).length;
+          return (
+            <button key={sector} className={`check-row${checked ? ' is-checked' : ''}`} onClick={() => toggleSector(sector)} aria-pressed={checked}>
+              <span className="check-box">{checked && <Check size={11} strokeWidth={3.2} color="#fff" />}</span>
+              <span>{sector}</span>
+              <span className="check-row__count">{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="filter-rail__section">
+        <div className="filter-rail__label">Region</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {REGIONS.map((r) => (
+            <button key={r} className={`chip${filterState.regions.includes(r) ? ' is-active' : ''}`} onClick={() => toggleRegion(r)} style={{ height: 28, fontSize: '0.76rem' }}>
+              {r}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Numerical Sliders Row */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '20px',
-        paddingTop: '16px',
-        borderTop: '1px solid var(--border-subtle)',
-      }}>
-        {/* Min ARR Slider */}
-        <div>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontSize: '0.75rem',
-            color: 'var(--text-muted)',
-            marginBottom: '6px',
-          }}>
-            <span>Min ARR</span>
-            <span style={{ color: '#ffffff', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
-              ${filterState.minArr}M+
-            </span>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="60"
-            step="5"
-            value={filterState.minArr}
-            onChange={(e) => setFilterState((prev) => ({ ...prev, minArr: Number(e.target.value) }))}
-            className="range-slider"
-          />
-        </div>
-
-        {/* Min Growth YoY Slider */}
-        <div>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontSize: '0.75rem',
-            color: 'var(--text-muted)',
-            marginBottom: '6px',
-          }}>
-            <span>Min YoY Revenue Growth</span>
-            <span style={{ color: 'var(--accent-emerald)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
-              +{filterState.minRevenueGrowth}%
-            </span>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="80"
-            step="5"
-            value={filterState.minRevenueGrowth}
-            onChange={(e) => setFilterState((prev) => ({ ...prev, minRevenueGrowth: Number(e.target.value) }))}
-            className="range-slider"
-          />
-        </div>
-
-        {/* Min Rule of 40 */}
-        <div>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontSize: '0.75rem',
-            color: 'var(--text-muted)',
-            marginBottom: '6px',
-          }}>
-            <span>Min Rule of 40 Score</span>
-            <span style={{ color: 'var(--accent-cyan)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
-              {filterState.minRuleOf40}%
-            </span>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="80"
-            step="5"
-            value={filterState.minRuleOf40}
-            onChange={(e) => setFilterState((prev) => ({ ...prev, minRuleOf40: Number(e.target.value) }))}
-            className="range-slider"
-          />
-        </div>
-
-        {/* Max EV/ARR Multiple */}
-        <div>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontSize: '0.75rem',
-            color: 'var(--text-muted)',
-            marginBottom: '6px',
-          }}>
-            <span>Max EV / ARR Multiple</span>
-            <span style={{ color: 'var(--accent-amber)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
-              {filterState.maxEvArr}x
-            </span>
-          </div>
-          <input
-            type="range"
-            min="5"
-            max="15"
-            step="0.5"
-            value={filterState.maxEvArr}
-            onChange={(e) => setFilterState((prev) => ({ ...prev, maxEvArr: Number(e.target.value) }))}
-            className="range-slider"
-          />
-        </div>
-
-        {/* Min Strategic Fit */}
-        <div>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            fontSize: '0.75rem',
-            color: 'var(--text-muted)',
-            marginBottom: '6px',
-          }}>
-            <span>Min Strategic Fit</span>
-            <span style={{ color: '#c084fc', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
-              {filterState.minStrategicFit}/100
-            </span>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="95"
-            step="5"
-            value={filterState.minStrategicFit}
-            onChange={(e) => setFilterState((prev) => ({ ...prev, minStrategicFit: Number(e.target.value) }))}
-            className="range-slider"
-          />
-        </div>
+      <div className="filter-rail__section" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div className="filter-rail__label" style={{ marginBottom: -6 }}>Financial criteria</div>
+        {RANGES.map((r) => {
+          const v = filterState[r.key] as number;
+          const fill = ((v - r.min) / (r.max - r.min)) * 100;
+          return (
+            <div key={r.key} className="range-field">
+              <div className="range-field__head">
+                <span>{r.label}</span>
+                <span className="range-field__value">{r.fmt(v)}</span>
+              </div>
+              <input
+                type="range"
+                className="range-slider is-filled"
+                min={r.min}
+                max={r.max}
+                step={r.step}
+                value={v}
+                style={{ ['--fill' as string]: `${fill}%` }}
+                onChange={(e) => setFilterState((prev) => ({ ...prev, [r.key]: Number(e.target.value) }))}
+                aria-label={r.label}
+              />
+            </div>
+          );
+        })}
       </div>
-    </div>
+    </aside>
   );
 };

@@ -48,8 +48,8 @@ export const SynergySimulator: React.FC<SynergySimulatorProps> = ({ target }) =>
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Intro Context Banner */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(6, 182, 212, 0.1) 100%)',
-        border: '1px solid rgba(139, 92, 246, 0.3)',
+        background: 'linear-gradient(135deg, rgba(var(--violet-rgb), 0.1) 0%, rgba(var(--accent-rgb), 0.1) 100%)',
+        border: '1px solid rgba(var(--violet-rgb), 0.3)',
         borderRadius: 'var(--radius-md)',
         padding: '16px',
         display: 'flex',
@@ -62,13 +62,13 @@ export const SynergySimulator: React.FC<SynergySimulatorProps> = ({ target }) =>
           <div style={{
             padding: '10px',
             borderRadius: '10px',
-            background: 'rgba(139, 92, 246, 0.2)',
-            color: '#c084fc',
+            background: 'rgba(var(--violet-rgb), 0.2)',
+            color: 'var(--violet)',
           }}>
             <Sparkles size={20} />
           </div>
           <div>
-            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#ffffff' }}>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-strong)' }}>
               Interactive Synergy & Pro-Forma Accretion Underwriter
             </h4>
             <p style={{ fontSize: '0.775rem', color: 'var(--text-muted)' }}>
@@ -99,7 +99,7 @@ export const SynergySimulator: React.FC<SynergySimulatorProps> = ({ target }) =>
       }}>
         {/* Left Column: Interactive Levers */}
         <div style={{
-          background: 'rgba(15, 23, 42, 0.7)',
+          background: 'rgba(var(--surface-rgb), 0.7)',
           padding: '20px',
           borderRadius: 'var(--radius-lg)',
           border: '1px solid var(--border-subtle)',
@@ -160,7 +160,7 @@ export const SynergySimulator: React.FC<SynergySimulatorProps> = ({ target }) =>
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '6px' }}>
               <span style={{ color: 'var(--text-main)', fontWeight: 500 }}>Cloud & Tech Infrastructure Consolidation</span>
-              <span style={{ color: '#38bdf8', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+              <span style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
                 -{simState.cogsSavingsPct}% COGS
               </span>
             </div>
@@ -182,7 +182,7 @@ export const SynergySimulator: React.FC<SynergySimulatorProps> = ({ target }) =>
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: '6px' }}>
               <span style={{ color: 'var(--text-main)', fontWeight: 500 }}>SG&A Redundancy Elimination</span>
-              <span style={{ color: '#c084fc', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+              <span style={{ color: 'var(--violet)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
                 -{simState.sgaConsolidationPct}% SG&A
               </span>
             </div>
@@ -206,21 +206,21 @@ export const SynergySimulator: React.FC<SynergySimulatorProps> = ({ target }) =>
               Deal Consideration Mix (% Cash / Debt / Equity)
             </h5>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', textAlign: 'center' }}>
-              <div style={{ background: '#0b1120', padding: '8px', borderRadius: '6px' }}>
+              <div style={{ background: 'var(--bg-inset)', padding: '8px', borderRadius: '6px' }}>
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>Cash</span>
                 <div style={{ fontWeight: 700, color: 'var(--accent-emerald)', fontFamily: 'var(--font-mono)' }}>
                   {simState.dealFinancing.cashPct}%
                 </div>
               </div>
-              <div style={{ background: '#0b1120', padding: '8px', borderRadius: '6px' }}>
+              <div style={{ background: 'var(--bg-inset)', padding: '8px', borderRadius: '6px' }}>
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>Debt</span>
                 <div style={{ fontWeight: 700, color: 'var(--accent-amber)', fontFamily: 'var(--font-mono)' }}>
                   {simState.dealFinancing.debtPct}%
                 </div>
               </div>
-              <div style={{ background: '#0b1120', padding: '8px', borderRadius: '6px' }}>
+              <div style={{ background: 'var(--bg-inset)', padding: '8px', borderRadius: '6px' }}>
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-subtle)' }}>Equity</span>
-                <div style={{ fontWeight: 700, color: '#38bdf8', fontFamily: 'var(--font-mono)' }}>
+                <div style={{ fontWeight: 700, color: 'var(--accent)', fontFamily: 'var(--font-mono)' }}>
                   {simState.dealFinancing.equityPct}%
                 </div>
               </div>
@@ -230,7 +230,7 @@ export const SynergySimulator: React.FC<SynergySimulatorProps> = ({ target }) =>
 
         {/* Right Column: Calculated Impact */}
         <div style={{
-          background: 'rgba(15, 23, 42, 0.7)',
+          background: 'rgba(var(--surface-rgb), 0.7)',
           padding: '20px',
           borderRadius: 'var(--radius-lg)',
           border: '1px solid var(--border-subtle)',
@@ -246,8 +246,8 @@ export const SynergySimulator: React.FC<SynergySimulatorProps> = ({ target }) =>
 
             {/* Accretion Highlight Box */}
             <div style={{
-              background: result.estimatedNetIncomeAccretionPct >= 0 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(244, 63, 94, 0.12)',
-              border: `1px solid ${result.estimatedNetIncomeAccretionPct >= 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(244, 63, 94, 0.3)'}`,
+              background: result.estimatedNetIncomeAccretionPct >= 0 ? 'rgba(var(--emerald-rgb), 0.12)' : 'rgba(244, 63, 94, 0.12)',
+              border: `1px solid ${result.estimatedNetIncomeAccretionPct >= 0 ? 'rgba(var(--emerald-rgb), 0.3)' : 'rgba(244, 63, 94, 0.3)'}`,
               borderRadius: 'var(--radius-md)',
               padding: '16px',
               textAlign: 'center',
@@ -276,14 +276,14 @@ export const SynergySimulator: React.FC<SynergySimulatorProps> = ({ target }) =>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.825rem', padding: '6px 0', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Annual Pre-Tax Synergies:</span>
-                <span style={{ color: '#c084fc', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+                <span style={{ color: 'var(--violet)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
                   +{formatCurrency(result.totalRunRateSynergyM)}/yr
                 </span>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.825rem', padding: '6px 0', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Pro Forma Combined Revenue:</span>
-                <span style={{ color: '#ffffff', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+                <span style={{ color: 'var(--text-strong)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
                   {formatCurrency(result.postDealCombinedRevenueM)}
                 </span>
               </div>
@@ -319,7 +319,7 @@ export const SynergySimulator: React.FC<SynergySimulatorProps> = ({ target }) =>
           <div style={{
             marginTop: '20px',
             padding: '12px',
-            background: '#0b1120',
+            background: 'var(--bg-inset)',
             borderRadius: 'var(--radius-md)',
             border: '1px solid var(--border-subtle)',
             fontSize: '0.75rem',

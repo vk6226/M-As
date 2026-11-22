@@ -65,14 +65,14 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
         <head>
           <title>${doc.title} - ${doc.docNumber}</title>
           <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; padding: 40px; color: #0f172a; }
-            h1 { color: #0f172a; border-bottom: 2px solid #0284c7; padding-bottom: 8px; font-size: 20px; }
-            h2 { color: #0369a1; margin-top: 24px; font-size: 16px; border-bottom: 1px solid #e2e8f0; }
-            h3 { color: #334155; font-size: 14px; margin-top: 16px; }
-            p { font-size: 13px; color: #334155; }
-            ul { font-size: 13px; color: #334155; }
-            .badge { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
-            .meta { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 12px; }
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; padding: 40px; color: var(--bg-secondary); }
+            h1 { color: var(--bg-secondary); border-bottom: 2px solid var(--accent-strong); padding-bottom: 8px; font-size: 20px; }
+            h2 { color: var(--accent-strong); margin-top: 24px; font-size: 16px; border-bottom: 1px solid var(--text-soft); }
+            h3 { color: var(--border-strong); font-size: 14px; margin-top: 16px; }
+            p { font-size: 13px; color: var(--border-strong); }
+            ul { font-size: 13px; color: var(--border-strong); }
+            .badge { display: inline-block; background: var(--text-main); color: var(--accent-strong); padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+            .meta { background: var(--text-main); border: 1px solid var(--text-soft); padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 12px; }
           </style>
         </head>
         <body>
@@ -101,10 +101,10 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
           maxHeight: '92vh',
           display: 'flex',
           flexDirection: 'column',
-          background: 'rgba(11, 17, 32, 0.98)',
+          background: 'rgba(var(--base-rgb), 0.98)',
           border: '1px solid var(--border-accent)',
           borderRadius: 'var(--radius-xl)',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(6, 182, 212, 0.15)',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(var(--accent-rgb), 0.15)',
           overflow: 'hidden',
         }}
       >
@@ -115,15 +115,15 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(9, 13, 22, 0.98) 100%)',
+          background: 'linear-gradient(135deg, rgba(var(--surface-rgb), 0.95) 0%, rgba(var(--base-rgb), 0.98) 100%)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <div style={{
               width: '42px',
               height: '42px',
               borderRadius: '12px',
-              background: 'rgba(6, 182, 212, 0.12)',
-              border: '1px solid rgba(6, 182, 212, 0.3)',
+              background: 'rgba(var(--accent-rgb), 0.12)',
+              border: '1px solid rgba(var(--accent-rgb), 0.3)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -141,8 +141,8 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
                   color: 'var(--accent-cyan)',
                   padding: '2px 8px',
                   borderRadius: '4px',
-                  background: 'rgba(6, 182, 212, 0.12)',
-                  border: '1px solid rgba(6, 182, 212, 0.25)',
+                  background: 'rgba(var(--accent-rgb), 0.12)',
+                  border: '1px solid rgba(var(--accent-rgb), 0.25)',
                 }}>
                   {doc.docNumber}
                 </span>
@@ -150,15 +150,15 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
                 <span
                   className="badge"
                   style={{
-                    background: `${doc.statusColor}15`,
+                    background: `color-mix(in srgb, ${doc.statusColor} 12%, transparent)`,
                     color: doc.statusColor,
-                    borderColor: `${doc.statusColor}40`,
+                    borderColor: `color-mix(in srgb, ${doc.statusColor} 35%, transparent)`,
                   }}
                 >
                   {doc.status}
                 </span>
               </div>
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#ffffff', marginTop: '4px' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-strong)', marginTop: '4px' }}>
                 {doc.title}
               </h3>
             </div>
@@ -187,7 +187,7 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
         {/* Metadata Strip */}
         <div style={{
           padding: '12px 28px',
-          background: '#090d16',
+          background: 'var(--bg-primary)',
           borderBottom: '1px solid var(--border-subtle)',
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -196,18 +196,18 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
         }}>
           <div>
             <span style={{ color: 'var(--text-subtle)', display: 'block', fontSize: '0.7rem' }}>TARGET ENTITY</span>
-            <span style={{ color: '#ffffff', fontWeight: 600 }}>{doc.targetName}</span>
+            <span style={{ color: 'var(--text-strong)', fontWeight: 600 }}>{doc.targetName}</span>
             <span style={{ color: 'var(--accent-cyan)', marginLeft: '6px', fontFamily: 'var(--font-mono)', fontSize: '0.7rem' }}>
               ({doc.codeName})
             </span>
           </div>
           <div>
             <span style={{ color: 'var(--text-subtle)', display: 'block', fontSize: '0.7rem' }}>COUNSEL OF RECORD</span>
-            <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{doc.counselOfRecord}</span>
+            <span style={{ color: 'var(--text-soft)', fontWeight: 500 }}>{doc.counselOfRecord}</span>
           </div>
           <div>
             <span style={{ color: 'var(--text-subtle)', display: 'block', fontSize: '0.7rem' }}>GOVERNING JURISDICTION</span>
-            <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{doc.governingLaw}</span>
+            <span style={{ color: 'var(--text-soft)', fontWeight: 500 }}>{doc.governingLaw}</span>
           </div>
           <div>
             <span style={{ color: 'var(--text-subtle)', display: 'block', fontSize: '0.7rem' }}>EXECUTION TIMELINE</span>
@@ -222,7 +222,7 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
           alignItems: 'center',
           justifyContent: 'space-between',
           borderBottom: '1px solid var(--border-subtle)',
-          background: 'rgba(15, 23, 42, 0.4)',
+          background: 'rgba(var(--surface-rgb), 0.4)',
           flexWrap: 'wrap',
           gap: '12px',
         }}>
@@ -255,7 +255,7 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button onClick={handleCopy} className="btn btn-secondary btn-sm" id="btn-copy-legal-doc">
-              {copied ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
+              {copied ? <Check size={13} color="var(--emerald)" /> : <Copy size={13} />}
               <span>{copied ? 'Copied' : 'Copy Text'}</span>
             </button>
             <button onClick={handleDownload} className="btn btn-secondary btn-sm" id="btn-download-legal-doc">
@@ -279,7 +279,7 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
             <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
               {/* Executive Preamble */}
               <div style={{
-                background: 'rgba(15, 23, 42, 0.7)',
+                background: 'rgba(var(--surface-rgb), 0.7)',
                 padding: '18px 20px',
                 borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border-subtle)',
@@ -288,14 +288,14 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
                 <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-cyan)', textTransform: 'uppercase', marginBottom: '6px' }}>
                   Recital & Preamble
                 </h4>
-                <p style={{ fontSize: '0.875rem', color: '#cbd5e1', lineHeight: 1.6 }}>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-soft)', lineHeight: 1.6 }}>
                   {doc.summary}
                 </p>
               </div>
 
               {/* Key Commercial Terms Highlight Grid */}
               <div>
-                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ffffff', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-strong)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Award size={15} color="var(--accent-amber)" />
                   Key Transaction Terms & Indemnification Guardrails
                 </h4>
@@ -308,7 +308,7 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
                     <div
                       key={i}
                       style={{
-                        background: '#0b1120',
+                        background: 'var(--bg-inset)',
                         padding: '12px 16px',
                         borderRadius: 'var(--radius-md)',
                         border: '1px solid var(--border-subtle)',
@@ -317,7 +317,7 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
                       <div style={{ fontSize: '0.7rem', color: 'var(--text-subtle)', textTransform: 'uppercase', fontWeight: 600 }}>
                         {term.label}
                       </div>
-                      <div style={{ fontSize: '0.85rem', color: '#f8fafc', fontWeight: 600, marginTop: '4px', lineHeight: 1.4 }}>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 600, marginTop: '4px', lineHeight: 1.4 }}>
                         {term.value}
                       </div>
                     </div>
@@ -327,7 +327,7 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
 
               {/* Detailed Articles / Clauses */}
               <div>
-                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ffffff', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-strong)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Scale size={15} color="var(--accent-cyan)" />
                   Definitive Articles & Operational Covenants
                 </h4>
@@ -336,7 +336,7 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
                     <div
                       key={i}
                       style={{
-                        background: 'rgba(15, 23, 42, 0.6)',
+                        background: 'rgba(var(--surface-rgb), 0.6)',
                         padding: '16px 20px',
                         borderRadius: 'var(--radius-md)',
                         border: '1px solid var(--border-subtle)',
@@ -352,11 +352,11 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
                           {clause.section}
                         </span>
                         <span style={{ color: 'var(--text-subtle)' }}>•</span>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ffffff' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-strong)' }}>
                           {clause.title}
                         </span>
                       </div>
-                      <p style={{ fontSize: '0.825rem', color: '#94a3b8', lineHeight: 1.6 }}>
+                      <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
                         {clause.content}
                       </p>
                     </div>
@@ -366,7 +366,7 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
 
               {/* Signatures & Execution Attestation Block */}
               <div>
-                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ffffff', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-strong)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <UserCheck size={15} color="var(--accent-emerald)" />
                   Counterparty Signatures & Escrow Attestation
                 </h4>
@@ -379,10 +379,10 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
                     <div
                       key={i}
                       style={{
-                        background: '#090d16',
+                        background: 'var(--bg-primary)',
                         padding: '14px 16px',
                         borderRadius: 'var(--radius-md)',
-                        border: `1px solid ${sig.status === 'Signed' ? 'rgba(16, 185, 129, 0.3)' : 'var(--border-subtle)'}`,
+                        border: `1px solid ${sig.status === 'Signed' ? 'rgba(var(--emerald-rgb), 0.3)' : 'var(--border-subtle)'}`,
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
@@ -393,7 +393,7 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
                           {sig.status}
                         </span>
                       </div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ffffff' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-strong)' }}>
                         {sig.signatory}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -401,7 +401,7 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
                       </div>
                       {sig.signedAt && (
                         <div style={{ fontSize: '0.7rem', color: 'var(--accent-emerald)', marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
-                          ✓ Timestamp: {sig.signedAt}
+                          Signed {sig.signedAt}
                         </div>
                       )}
                     </div>
@@ -427,32 +427,32 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
                 </thead>
                 <tbody>
                   <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                    <td style={{ padding: '12px 14px', fontWeight: 600, color: '#ffffff' }}>Representations & Warranties Survival</td>
-                    <td style={{ padding: '12px 14px', color: '#e2e8f0' }}>18 Months General / 6 Years Fundamental & Tax</td>
+                    <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--text-strong)' }}>Representations & Warranties Survival</td>
+                    <td style={{ padding: '12px 14px', color: 'var(--text-soft)' }}>18 Months General / 6 Years Fundamental & Tax</td>
                     <td style={{ padding: '12px 14px' }}><span className="badge badge-emerald">Low Risk</span></td>
                     <td style={{ padding: '12px 14px', color: 'var(--text-muted)' }}>Escrow & R&W Insurance policy</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                    <td style={{ padding: '12px 14px', fontWeight: 600, color: '#ffffff' }}>Indemnification Cap & Deductible</td>
-                    <td style={{ padding: '12px 14px', color: '#e2e8f0' }}>1.0% ($4.6M) retention; $50M Buyer-Side Policy</td>
+                    <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--text-strong)' }}>Indemnification Cap & Deductible</td>
+                    <td style={{ padding: '12px 14px', color: 'var(--text-soft)' }}>1.0% ($4.6M) retention; $50M Buyer-Side Policy</td>
                     <td style={{ padding: '12px 14px' }}><span className="badge badge-emerald">Optimal</span></td>
                     <td style={{ padding: '12px 14px', color: 'var(--text-muted)' }}>Euclid Transactional Insurance Binder</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                    <td style={{ padding: '12px 14px', fontWeight: 600, color: '#ffffff' }}>Antitrust HSR Filing Clearance</td>
-                    <td style={{ padding: '12px 14px', color: '#e2e8f0' }}>15 U.S.C. § 18a FTC/DOJ review passed</td>
+                    <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--text-strong)' }}>Antitrust HSR Filing Clearance</td>
+                    <td style={{ padding: '12px 14px', color: 'var(--text-soft)' }}>15 U.S.C. § 18a FTC/DOJ review passed</td>
                     <td style={{ padding: '12px 14px' }}><span className="badge badge-cyan">Cleared</span></td>
                     <td style={{ padding: '12px 14px', color: 'var(--text-muted)' }}>Federal Early Termination Notice</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                    <td style={{ padding: '12px 14px', fontWeight: 600, color: '#ffffff' }}>IP Chain of Title & Contamination</td>
-                    <td style={{ padding: '12px 14px', color: '#e2e8f0' }}>100% PIIA Execution; 0 GPL/AGPL viral hooks</td>
+                    <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--text-strong)' }}>IP Chain of Title & Contamination</td>
+                    <td style={{ padding: '12px 14px', color: 'var(--text-soft)' }}>100% PIIA Execution; 0 GPL/AGPL viral hooks</td>
                     <td style={{ padding: '12px 14px' }}><span className="badge badge-emerald">Verified</span></td>
                     <td style={{ padding: '12px 14px', color: 'var(--text-muted)' }}>Black Duck Automated Static Code Audit</td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '12px 14px', fontWeight: 600, color: '#ffffff' }}>Restrictive Non-Compete Period</td>
-                    <td style={{ padding: '12px 14px', color: '#e2e8f0' }}>36 Months covering North America & EU</td>
+                    <td style={{ padding: '12px 14px', fontWeight: 600, color: 'var(--text-strong)' }}>Restrictive Non-Compete Period</td>
+                    <td style={{ padding: '12px 14px', color: 'var(--text-soft)' }}>36 Months covering North America & EU</td>
                     <td style={{ padding: '12px 14px' }}><span className="badge badge-purple">Enforceable</span></td>
                     <td style={{ padding: '12px 14px', color: 'var(--text-muted)' }}>Delaware Chancery Injunction Remedy</td>
                   </tr>
@@ -463,14 +463,14 @@ export const LegalDocViewerModal: React.FC<LegalDocViewerModalProps> = ({ docume
 
           {activeTab === 'raw' && (
             <div style={{
-              background: '#090d16',
+              background: 'var(--bg-primary)',
               borderRadius: 'var(--radius-lg)',
               border: '1px solid var(--border-subtle)',
               padding: '24px',
               fontFamily: 'var(--font-mono)',
               fontSize: '0.8rem',
               lineHeight: 1.6,
-              color: '#e2e8f0',
+              color: 'var(--text-soft)',
               whiteSpace: 'pre-wrap',
               boxShadow: 'inset 0 2px 10px rgba(0, 0, 0, 0.5)',
             }}>

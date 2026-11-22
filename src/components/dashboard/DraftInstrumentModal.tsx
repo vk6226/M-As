@@ -105,10 +105,10 @@ export const DraftInstrumentModal: React.FC<DraftInstrumentModalProps> = ({
         onClick={(e) => e.stopPropagation()}
         style={{
           maxWidth: '680px',
-          background: 'rgba(11, 17, 32, 0.98)',
+          background: 'rgba(var(--base-rgb), 0.98)',
           border: '1px solid var(--border-accent)',
           borderRadius: 'var(--radius-xl)',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(6, 182, 212, 0.2)',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(var(--accent-rgb), 0.2)',
           overflow: 'hidden',
         }}
       >
@@ -118,15 +118,15 @@ export const DraftInstrumentModal: React.FC<DraftInstrumentModalProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(9, 13, 22, 0.98) 100%)',
+          background: 'linear-gradient(135deg, rgba(var(--surface-rgb), 0.95) 0%, rgba(var(--base-rgb), 0.98) 100%)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
               width: '38px',
               height: '38px',
               borderRadius: '10px',
-              background: 'rgba(6, 182, 212, 0.15)',
-              border: '1px solid rgba(6, 182, 212, 0.3)',
+              background: 'rgba(var(--accent-rgb), 0.15)',
+              border: '1px solid rgba(var(--accent-rgb), 0.3)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -135,7 +135,7 @@ export const DraftInstrumentModal: React.FC<DraftInstrumentModalProps> = ({
               <FileSignature size={18} />
             </div>
             <div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#ffffff' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-strong)' }}>
                 Draft New M&A Legal Instrument
               </h3>
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>

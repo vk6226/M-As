@@ -14,7 +14,7 @@ export const FinancialTeardownChart: React.FC<FinancialTeardownChartProps> = ({ 
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* 5-Year Historical & Projected Growth Bar Visualizer */}
       <div style={{
-        background: 'rgba(15, 23, 42, 0.7)',
+        background: 'rgba(var(--surface-rgb), 0.7)',
         padding: '20px',
         borderRadius: 'var(--radius-lg)',
         border: '1px solid var(--border-subtle)',
@@ -70,7 +70,7 @@ export const FinancialTeardownChart: React.FC<FinancialTeardownChartProps> = ({ 
                   fontSize: '0.725rem',
                   fontFamily: 'var(--font-mono)',
                   fontWeight: 700,
-                  color: '#ffffff',
+                  color: 'var(--text-strong)',
                 }}>
                   ${f.revenue}M
                 </span>
@@ -90,10 +90,10 @@ export const FinancialTeardownChart: React.FC<FinancialTeardownChartProps> = ({ 
                       width: '45%',
                       height: `${revHeightPct}%`,
                       background: f.year.includes('(P)')
-                        ? 'repeating-linear-gradient(45deg, #0284c7, #0284c7 8px, #0369a1 8px, #0369a1 16px)'
-                        : 'linear-gradient(180deg, #38bdf8 0%, #0284c7 100%)',
+                        ? 'repeating-linear-gradient(45deg, var(--accent-strong), var(--accent-strong) 8px, var(--accent-strong) 8px, var(--accent-strong) 16px)'
+                        : 'linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%)',
                       borderRadius: '4px 4px 0 0',
-                      boxShadow: '0 0 10px rgba(56, 189, 248, 0.2)',
+                      boxShadow: '0 0 10px rgba(var(--accent-rgb), 0.2)',
                     }}
                     title={`Revenue: $${f.revenue}M`}
                   />
@@ -104,7 +104,7 @@ export const FinancialTeardownChart: React.FC<FinancialTeardownChartProps> = ({ 
                       width: '45%',
                       height: `${Math.max(6, ebitdaHeightPct)}%`,
                       background: f.ebitda >= 0
-                        ? 'linear-gradient(180deg, #34d399 0%, #059669 100%)'
+                        ? 'linear-gradient(180deg, var(--emerald) 0%, var(--emerald) 100%)'
                         : '#f43f5e',
                       borderRadius: '4px 4px 0 0',
                     }}
@@ -165,7 +165,7 @@ export const FinancialTeardownChart: React.FC<FinancialTeardownChartProps> = ({ 
               <tr>
                 <td style={{ padding: '8px', color: 'var(--text-muted)' }}>Free Cash Flow (FCF)</td>
                 {target.historicalFinancials.map((f, i) => (
-                  <td key={i} style={{ padding: '8px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: f.fcf >= 0 ? '#ffffff' : 'var(--accent-rose)' }}>
+                  <td key={i} style={{ padding: '8px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: f.fcf >= 0 ? 'var(--text-strong)' : 'var(--accent-rose)' }}>
                     ${f.fcf.toFixed(1)}
                   </td>
                 ))}
@@ -183,7 +183,7 @@ export const FinancialTeardownChart: React.FC<FinancialTeardownChartProps> = ({ 
       }}>
         {/* Retention & CAC */}
         <div style={{
-          background: 'rgba(15, 23, 42, 0.7)',
+          background: 'rgba(var(--surface-rgb), 0.7)',
           padding: '16px',
           borderRadius: 'var(--radius-md)',
           border: '1px solid var(--border-subtle)',
@@ -201,7 +201,7 @@ export const FinancialTeardownChart: React.FC<FinancialTeardownChartProps> = ({ 
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: 'var(--text-subtle)' }}>CAC Payback Period:</span>
-              <span style={{ color: '#ffffff', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+              <span style={{ color: 'var(--text-strong)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
                 {target.financials.cacPaybackMonths} Months
               </span>
             </div>
@@ -216,19 +216,19 @@ export const FinancialTeardownChart: React.FC<FinancialTeardownChartProps> = ({ 
 
         {/* Customer Base & Concentration */}
         <div style={{
-          background: 'rgba(15, 23, 42, 0.7)',
+          background: 'rgba(var(--surface-rgb), 0.7)',
           padding: '16px',
           borderRadius: 'var(--radius-md)',
           border: '1px solid var(--border-subtle)',
         }}>
           <h5 style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Users size={14} color="#c084fc" />
+            <Users size={14} color="var(--violet)" />
             Customer Base & Revenue Risk
           </h5>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.825rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: 'var(--text-subtle)' }}>Total Enterprise Accounts:</span>
-              <span style={{ color: '#ffffff', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+              <span style={{ color: 'var(--text-strong)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
                 {target.financials.customerCount} Logos
               </span>
             </div>

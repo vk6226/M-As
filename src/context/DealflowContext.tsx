@@ -3,7 +3,9 @@ import { TargetCompany, PipelineDeal, DealStage, PriorityLevel, AcquirerProfile,
 import { MOCK_TARGETS } from '../data/mockTargets';
 import { CURRENT_ACQUIRER, INITIAL_PIPELINE } from '../data/acquirerProfile';
 
-export type AppView = 'dashboard' | 'screener' | 'pipeline' | 'compare' | 'aws-guide';
+export type ResearchMarket = 'us' | 'in' | 'in-private';
+
+export type AppView = 'dashboard' | 'screener' | 'pipeline' | 'compare' | 'research' | 'activity' | 'documents' | 'aws-guide';
 
 interface ToastMessage {
   id: string;
@@ -18,6 +20,12 @@ interface DealflowContextType {
   acquirer: AcquirerProfile;
   currentView: AppView;
   setCurrentView: (view: AppView) => void;
+  researchCik: string | null;
+  openResearch: (cik: string) => void;
+  researchMarket: ResearchMarket;
+  setResearchMarket: (m: ResearchMarket) => void;
+  researchSymbol: string | null;
+  openIndiaResearch: (symbol: string) => void;
   selectedTarget: TargetCompany | null;
   setSelectedTarget: (target: TargetCompany | null) => void;
   compareTargets: TargetCompany[];
@@ -79,6 +87,19 @@ export const DealflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
   const [acquirer] = useState<AcquirerProfile>(CURRENT_ACQUIRER);
   const [currentView, setCurrentView] = useState<AppView>('dashboard');
+  const [researchCik, setResearchCik] = useState<string | null>(null);
+  const [researchMarket, setResearchMarket] = useState<ResearchMarket>('us');
+  const [researchSymbol, setResearchSymbol] = useState<string | null>(null);
+  const openResearch = (cik: string) => {
+    setResearchCik(cik);
+    setResearchMarket('us');
+    setCurrentView('research');
+  };
+  const openIndiaResearch = (symbol: string) => {
+    setResearchSymbol(symbol);
+    setResearchMarket('in');
+    setCurrentView('research');
+  };
   const [selectedTarget, setSelectedTarget] = useState<TargetCompany | null>(null);
   const [compareTargetIds, setCompareTargetIds] = useState<string[]>(['tgt-01', 'tgt-02']);
   const [filterState, setFilterState] = useState<ScreenerFilterState>(DEFAULT_FILTERS);
@@ -232,6 +253,12 @@ export const DealflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         acquirer,
         currentView,
         setCurrentView,
+        researchCik,
+        openResearch,
+        researchMarket,
+        setResearchMarket,
+        researchSymbol,
+        openIndiaResearch,
         selectedTarget,
         setSelectedTarget,
         compareTargets,

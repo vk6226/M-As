@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
 import { TargetCompany } from '../../types/mna';
 import { useDealflow } from '../../context/DealflowContext';
 import { FinancialTeardownChart } from './FinancialTeardownChart';
@@ -20,7 +21,9 @@ import {
   Plus, 
   Check, 
   ExternalLink,
-  Scale
+  Scale,
+  ShieldCheck,
+  CheckCircle2,
 } from 'lucide-react';
 import { formatCurrency, formatMultiple, formatPercent } from '../../utils/financialFormulas';
 import { MOCK_LEGAL_DOCUMENTS } from '../../data/legalDocuments';
@@ -32,6 +35,14 @@ export const TargetDossierModal: React.FC = () => {
   const { selectedTarget, setSelectedTarget, addToPipeline, pipeline, showToast } = useDealflow();
   const [activeTab, setActiveTab] = useState<DossierTab>('overview');
 
+  useEffect(() => {
+    if (!selectedTarget) return;
+    setActiveTab('overview');
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setSelectedTarget(null);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [selectedTarget, setSelectedTarget]);
+
   if (!selectedTarget) return null;
 
   const target = selectedTarget;
@@ -39,18 +50,18 @@ export const TargetDossierModal: React.FC = () => {
   const targetLegalDocs = MOCK_LEGAL_DOCUMENTS.filter((d) => d.targetId === target.id);
 
   const tabs: { id: DossierTab; label: string; icon: React.ReactNode; count?: number }[] = [
-    { id: 'overview', label: 'Overview & Strategy', icon: <Zap size={15} /> },
-    { id: 'financials', label: 'Financial Teardown', icon: <BarChart3 size={15} /> },
-    { id: 'synergies', label: 'Synergy Simulator', icon: <Sparkles size={15} /> },
-    { id: 'risks', label: 'Risks & Due Diligence', icon: <ShieldAlert size={15} />, count: target.risks.length },
-    { id: 'legal', label: 'Legal & Compliance', icon: <Scale size={15} />, count: targetLegalDocs.length },
-    { id: 'ic-memo', label: 'IC Memo Generator', icon: <FileText size={15} /> },
+    { id: 'overview', label: 'Overview', icon: <Zap size={15} /> },
+    { id: 'financials', label: 'Financials', icon: <BarChart3 size={15} /> },
+    { id: 'synergies', label: 'Synergies', icon: <Sparkles size={15} /> },
+    { id: 'risks', label: 'Risks', icon: <ShieldAlert size={15} />, count: target.risks.length },
+    { id: 'legal', label: 'Legal', icon: <Scale size={15} />, count: targetLegalDocs.length },
+    { id: 'ic-memo', label: 'IC memo', icon: <FileText size={15} /> },
   ];
 
   return (
-    <div className="modal-backdrop" onClick={() => setSelectedTarget(null)}>
+    <div className="modal-backdrop modal-backdrop--sheet" onClick={() => setSelectedTarget(null)}>
       <div
-        className="modal-content"
+        className="modal-content modal-content--sheet"
         onClick={(e) => e.stopPropagation()}
         style={{
           display: 'flex',
@@ -58,111 +69,51 @@ export const TargetDossierModal: React.FC = () => {
           maxHeight: '92vh',
         }}
       >
-        {/* Modal Header */}
-        <div style={{
-          padding: '24px 28px',
-          borderBottom: '1px solid var(--border-subtle)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: 'rgba(15, 23, 42, 0.95)',
-          borderTopLeftRadius: 'var(--radius-xl)',
-          borderTopRightRadius: 'var(--radius-xl)',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{
-              width: '50px',
-              height: '50px',
-              borderRadius: '14px',
-              background: `linear-gradient(135deg, ${target.logoColor} 0%, #1e293b 100%)`,
-              border: `1px solid ${target.logoAccent}50`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.25rem',
-              fontWeight: 800,
-              color: '#ffffff',
-              boxShadow: `0 0 15px ${target.logoColor}40`,
-            }}>
-              {target.name.slice(0, 2).toUpperCase()}
+        <div className="dossier-head">
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
+              <span className="tcard__logo" style={{ width: 52, height: 52, borderRadius: 14, fontSize: '1.1rem', background: `linear-gradient(140deg, ${target.logoColor}, ${target.logoAccent ?? target.logoColor} 120%)` }}>
+                {target.name.slice(0, 2).toUpperCase()}
+              </span>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <h2 style={{ fontSize: '1.35rem', fontWeight: 650 }}>{target.name}</h2>
+                  <span className="badge badge-cyan font-mono">{target.codeName}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4, flexWrap: 'wrap' }}>
+                  <span style={{ color: 'var(--text-soft)' }}>{target.sector}</span>
+                  <span>·</span>
+                  <span>{target.subSector}</span>
+                  <span>·</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    <MapPin size={12} /> {target.headquarters.city}, {target.headquarters.country}
+                  </span>
+                </div>
+              </div>
             </div>
-
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <h2 style={{ fontSize: '1.35rem', fontWeight: 800 }}>{target.name}</h2>
-                <span style={{
-                  padding: '2px 8px',
-                  borderRadius: '6px',
-                  background: 'rgba(6, 182, 212, 0.15)',
-                  color: 'var(--accent-cyan)',
-                  border: '1px solid rgba(6, 182, 212, 0.3)',
-                  fontWeight: 700,
-                  fontSize: '0.75rem',
-                  fontFamily: 'var(--font-mono)',
-                }}>
-                  {target.codeName}
-                </span>
-                <span className="badge badge-emerald">{target.dealReadiness}</span>
-              </div>
-
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                fontSize: '0.78rem',
-                color: 'var(--text-muted)',
-                marginTop: '4px',
-              }}>
-                <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>{target.sector}</span>
-                <span>•</span>
-                <span>{target.subSector}</span>
-                <span>•</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                  <MapPin size={12} />
-                  {target.headquarters.city}, {target.headquarters.country}
-                </span>
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              <button
+                onClick={() => !isAlreadyInPipeline && addToPipeline(target.id)}
+                disabled={isAlreadyInPipeline}
+                className={`btn btn-sm ${isAlreadyInPipeline ? 'btn-secondary' : 'btn-primary'}`}
+                style={isAlreadyInPipeline ? { color: 'var(--emerald)', opacity: 1 } : undefined}
+                id="btn-modal-add-pipeline"
+              >
+                {isAlreadyInPipeline ? <Check size={14} /> : <Plus size={14} />}
+                {isAlreadyInPipeline ? 'In pipeline' : 'Add to pipeline'}
+              </button>
+              <button className="icon-btn" onClick={() => setSelectedTarget(null)} aria-label="Close dossier" title="Close (Esc)">
+                <X size={16} />
+              </button>
             </div>
           </div>
-
-          {/* Action buttons & Close */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button
-              onClick={() => !isAlreadyInPipeline && addToPipeline(target.id)}
-              disabled={isAlreadyInPipeline}
-              className={`btn btn-sm ${isAlreadyInPipeline ? 'btn-secondary' : 'btn-emerald'}`}
-              id="btn-modal-add-pipeline"
-            >
-              {isAlreadyInPipeline ? (
-                <>
-                  <Check size={14} color="#10b981" />
-                  <span style={{ color: '#10b981' }}>In Active Pipeline</span>
-                </>
-              ) : (
-                <>
-                  <Plus size={14} />
-                  <span>Add to Deal Pipeline</span>
-                </>
-              )}
-            </button>
-
-            <button
-              onClick={() => setSelectedTarget(null)}
-              id="btn-close-dossier"
-              style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: '8px',
-                padding: '8px',
-                color: 'var(--text-muted)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <X size={18} />
-            </button>
+          <div className="dossier-stats">
+            <div><div className="stat__label">ARR</div><div className="stat__value">{formatCurrency(target.financials.arr)}</div></div>
+            <div><div className="stat__label">Growth</div><div className="stat__value stat__value--positive">+{target.financials.revenueGrowthYoY.toFixed(0)}%</div></div>
+            <div><div className="stat__label">Target EV</div><div className="stat__value">{formatCurrency(target.valuation.targetEnterpriseValue)}</div></div>
+            <div><div className="stat__label">EV / ARR</div><div className="stat__value">{formatMultiple(target.valuation.evArrMultiple)}</div></div>
+            <div><div className="stat__label">Synergies</div><div className="stat__value" style={{ color: 'var(--violet)' }}>+{formatCurrency(target.strategicFit.potentialSynergiesRunRateM)}</div></div>
+            <div><div className="stat__label">Strategic fit</div><div className="stat__value stat__value--accent">{target.strategicFit.overallScore}/100</div></div>
           </div>
         </div>
 
@@ -171,7 +122,7 @@ export const TargetDossierModal: React.FC = () => {
           display: 'flex',
           gap: '8px',
           padding: '12px 28px',
-          background: 'rgba(11, 17, 32, 0.8)',
+          background: 'rgba(var(--base-rgb), 0.8)',
           borderBottom: '1px solid var(--border-subtle)',
           overflowX: 'auto',
         }}>
@@ -183,27 +134,36 @@ export const TargetDossierModal: React.FC = () => {
                 onClick={() => setActiveTab(tab.id)}
                 id={`tab-dossier-${tab.id}`}
                 style={{
+                  position: 'relative',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  padding: '8px 16px',
+                  padding: '8px 14px',
                   borderRadius: 'var(--radius-md)',
-                  background: isActive ? 'rgba(6, 182, 212, 0.15)' : 'transparent',
-                  border: isActive ? '1px solid var(--accent-cyan)' : '1px solid transparent',
-                  color: isActive ? '#ffffff' : 'var(--text-muted)',
+                  background: 'transparent',
+                  border: '1px solid transparent',
+                  color: isActive ? 'var(--text-strong)' : 'var(--text-muted)',
                   fontSize: '0.825rem',
-                  fontWeight: isActive ? 700 : 500,
+                  fontWeight: isActive ? 600 : 500,
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                   whiteSpace: 'nowrap',
                 }}
               >
-                <span style={{ color: isActive ? 'var(--accent-cyan)' : 'var(--text-subtle)' }}>
+                {isActive && (
+                  <motion.span
+                    layoutId="dossier-tab"
+                    transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                    style={{ position: 'absolute', inset: 0, borderRadius: 'var(--radius-md)', background: 'rgba(var(--accent-rgb), 0.14)', border: '1px solid rgba(var(--accent-rgb), 0.35)' }}
+                  />
+                )}
+                <span style={{ position: 'relative', color: isActive ? 'var(--accent-cyan)' : 'var(--text-subtle)', display: 'flex' }}>
                   {tab.icon}
                 </span>
-                <span>{tab.label}</span>
-                {tab.count !== undefined && (
+                <span style={{ position: 'relative' }}>{tab.label}</span>
+                {!!tab.count && (
                   <span style={{
+                    position: 'relative',
                     fontSize: '0.7rem',
                     padding: '1px 6px',
                     borderRadius: '999px',
@@ -220,7 +180,7 @@ export const TargetDossierModal: React.FC = () => {
         </div>
 
         {/* Tab Content Body */}
-        <div style={{ padding: '28px', overflowY: 'auto' }}>
+        <div key={activeTab} className="tab-panel" style={{ padding: '28px', overflowY: 'auto', flex: 1 }}>
           {/* TAB 1: OVERVIEW & STRATEGY */}
           {activeTab === 'overview' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -231,7 +191,7 @@ export const TargetDossierModal: React.FC = () => {
                 gap: '20px',
               }}>
                 <div style={{
-                  background: 'rgba(15, 23, 42, 0.7)',
+                  background: 'rgba(var(--surface-rgb), 0.7)',
                   padding: '20px',
                   borderRadius: 'var(--radius-lg)',
                   border: '1px solid var(--border-subtle)',
@@ -239,13 +199,13 @@ export const TargetDossierModal: React.FC = () => {
                   <h4 style={{ fontSize: '0.9rem', color: 'var(--accent-cyan)', fontWeight: 700, marginBottom: '10px' }}>
                     Executive Briefing & Architecture
                   </h4>
-                  <p style={{ fontSize: '0.85rem', color: '#e2e8f0', lineHeight: 1.6 }}>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-soft)', lineHeight: 1.6 }}>
                     {target.executiveSummary}
                   </p>
                 </div>
 
                 <div style={{
-                  background: 'rgba(15, 23, 42, 0.7)',
+                  background: 'rgba(var(--surface-rgb), 0.7)',
                   padding: '20px',
                   borderRadius: 'var(--radius-lg)',
                   border: '1px solid var(--border-subtle)',
@@ -253,7 +213,7 @@ export const TargetDossierModal: React.FC = () => {
                   <h4 style={{ fontSize: '0.9rem', color: 'var(--accent-emerald)', fontWeight: 700, marginBottom: '10px' }}>
                     Corporate M&A Investment Thesis
                   </h4>
-                  <p style={{ fontSize: '0.85rem', color: '#e2e8f0', lineHeight: 1.6 }}>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-soft)', lineHeight: 1.6 }}>
                     {target.investmentThesis}
                   </p>
                 </div>
@@ -261,7 +221,7 @@ export const TargetDossierModal: React.FC = () => {
 
               {/* Strategic Scorecard Breakdown */}
               <div style={{
-                background: 'rgba(15, 23, 42, 0.7)',
+                background: 'rgba(var(--surface-rgb), 0.7)',
                 padding: '20px',
                 borderRadius: 'var(--radius-lg)',
                 border: '1px solid var(--border-subtle)',
@@ -288,7 +248,7 @@ export const TargetDossierModal: React.FC = () => {
                   </div>
                   <div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)' }}>Cultural Compatibility</div>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#c084fc', fontFamily: 'var(--font-mono)' }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--violet)', fontFamily: 'var(--font-mono)' }}>
                       {target.strategicFit.culturalCompatibility}/100
                     </div>
                   </div>
@@ -309,7 +269,7 @@ export const TargetDossierModal: React.FC = () => {
               }}>
                 {/* Tech Stack */}
                 <div style={{
-                  background: 'rgba(15, 23, 42, 0.7)',
+                  background: 'rgba(var(--surface-rgb), 0.7)',
                   padding: '20px',
                   borderRadius: 'var(--radius-lg)',
                   border: '1px solid var(--border-subtle)',
@@ -323,11 +283,11 @@ export const TargetDossierModal: React.FC = () => {
                       <span key={i} style={{
                         padding: '4px 10px',
                         borderRadius: '6px',
-                        background: '#0b1120',
+                        background: 'var(--bg-inset)',
                         border: '1px solid var(--border-subtle)',
                         fontSize: '0.78rem',
                         fontFamily: 'var(--font-mono)',
-                        color: '#f8fafc',
+                        color: 'var(--text-main)',
                       }}>
                         {tech}
                       </span>
@@ -337,13 +297,13 @@ export const TargetDossierModal: React.FC = () => {
 
                 {/* Customers & IP */}
                 <div style={{
-                  background: 'rgba(15, 23, 42, 0.7)',
+                  background: 'rgba(var(--surface-rgb), 0.7)',
                   padding: '20px',
                   borderRadius: 'var(--radius-lg)',
                   border: '1px solid var(--border-subtle)',
                 }}>
                   <h4 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Award size={15} color="#c084fc" />
+                    <Award size={15} color="var(--violet)" />
                     Key Enterprise Customers & IP Patents
                   </h4>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
@@ -352,7 +312,7 @@ export const TargetDossierModal: React.FC = () => {
                     ))}
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    Granted Patents: <strong style={{ color: '#ffffff' }}>{target.patentsCount} active utility patents</strong>
+                    Granted Patents: <strong style={{ color: 'var(--text-strong)' }}>{target.patentsCount} active utility patents</strong>
                   </div>
                 </div>
               </div>
@@ -380,7 +340,7 @@ export const TargetDossierModal: React.FC = () => {
                 <div
                   key={risk.id}
                   style={{
-                    background: 'rgba(15, 23, 42, 0.7)',
+                    background: 'rgba(var(--surface-rgb), 0.7)',
                     padding: '20px',
                     borderRadius: 'var(--radius-lg)',
                     border: '1px solid var(--border-subtle)',
@@ -398,7 +358,7 @@ export const TargetDossierModal: React.FC = () => {
                     </div>
                   </div>
 
-                  <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', marginBottom: '6px' }}>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-strong)', marginBottom: '6px' }}>
                     {risk.title}
                   </h4>
                   <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', marginBottom: '12px', lineHeight: 1.5 }}>
@@ -406,12 +366,12 @@ export const TargetDossierModal: React.FC = () => {
                   </p>
 
                   <div style={{
-                    background: '#0b1120',
+                    background: 'var(--bg-inset)',
                     padding: '10px 14px',
                     borderRadius: 'var(--radius-md)',
                     border: '1px solid rgba(255, 255, 255, 0.05)',
                     fontSize: '0.8rem',
-                    color: '#e2e8f0',
+                    color: 'var(--text-soft)',
                   }}>
                     <strong style={{ color: 'var(--accent-emerald)' }}>Mitigation Control: </strong>
                     {risk.mitigation}
@@ -425,7 +385,7 @@ export const TargetDossierModal: React.FC = () => {
           {activeTab === 'legal' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div style={{
-                background: 'rgba(15, 23, 42, 0.7)',
+                background: 'rgba(var(--surface-rgb), 0.7)',
                 padding: '16px 20px',
                 borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border-subtle)',
@@ -436,7 +396,7 @@ export const TargetDossierModal: React.FC = () => {
                 gap: '12px',
               }}>
                 <div>
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#ffffff' }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-strong)' }}>
                     Transaction Legal Instruments & Regulatory Filing Dossier
                   </h4>
                   <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
@@ -480,7 +440,7 @@ export const TargetDossierModal: React.FC = () => {
                     <div
                       key={doc.id}
                       style={{
-                        background: '#090d16',
+                        background: 'var(--bg-primary)',
                         padding: '18px 20px',
                         borderRadius: 'var(--radius-md)',
                         border: '1px solid var(--border-subtle)',
@@ -496,7 +456,7 @@ export const TargetDossierModal: React.FC = () => {
                             fontSize: '0.75rem',
                             fontWeight: 700,
                             color: 'var(--accent-cyan)',
-                            background: 'rgba(6, 182, 212, 0.12)',
+                            background: 'rgba(var(--accent-rgb), 0.12)',
                             padding: '2px 8px',
                             borderRadius: '4px',
                           }}>
@@ -507,9 +467,9 @@ export const TargetDossierModal: React.FC = () => {
                         <span
                           className="badge"
                           style={{
-                            background: `${doc.statusColor}18`,
+                            background: `color-mix(in srgb, ${doc.statusColor} 12%, transparent)`,
                             color: doc.statusColor,
-                            borderColor: `${doc.statusColor}40`,
+                            borderColor: `color-mix(in srgb, ${doc.statusColor} 35%, transparent)`,
                           }}
                         >
                           {doc.status}
@@ -517,10 +477,10 @@ export const TargetDossierModal: React.FC = () => {
                       </div>
 
                       <div>
-                        <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff' }}>
+                        <h4 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-strong)' }}>
                           {doc.title}
                         </h4>
-                        <p style={{ fontSize: '0.8rem', color: '#cbd5e1', lineHeight: 1.5, marginTop: '4px' }}>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-soft)', lineHeight: 1.5, marginTop: '4px' }}>
                           {doc.summary}
                         </p>
                       </div>
@@ -535,7 +495,7 @@ export const TargetDossierModal: React.FC = () => {
                           <div
                             key={idx}
                             style={{
-                              background: 'rgba(15, 23, 42, 0.8)',
+                              background: 'rgba(var(--surface-rgb), 0.8)',
                               padding: '8px 12px',
                               borderRadius: '6px',
                               border: '1px solid rgba(255, 255, 255, 0.04)',
@@ -543,7 +503,7 @@ export const TargetDossierModal: React.FC = () => {
                             }}
                           >
                             <span style={{ color: 'var(--text-subtle)', display: 'block', fontSize: '0.7rem' }}>{t.label}</span>
-                            <span style={{ color: '#f8fafc', fontWeight: 600 }}>{t.value}</span>
+                            <span style={{ color: 'var(--text-main)', fontWeight: 600 }}>{t.value}</span>
                           </div>
                         ))}
                       </div>
@@ -579,13 +539,13 @@ export const TargetDossierModal: React.FC = () => {
               ) : (
                 <div style={{
                   padding: '30px',
-                  background: '#090d16',
+                  background: 'var(--bg-primary)',
                   borderRadius: 'var(--radius-md)',
                   border: '1px dashed var(--border-subtle)',
                   textAlign: 'center',
                 }}>
                   <Scale size={28} color="var(--text-subtle)" style={{ marginBottom: '8px' }} />
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#ffffff' }}>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-strong)' }}>
                     Preliminary Confidentiality & MNDA In Progress
                   </h4>
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px', maxWidth: '500px', margin: '4px auto 16px' }}>
@@ -628,29 +588,29 @@ export const TargetDossierModal: React.FC = () => {
 
               {/* Statutory Due Diligence Checklist */}
               <div style={{
-                background: '#090d16',
+                background: 'var(--bg-primary)',
                 padding: '18px 20px',
                 borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border-subtle)',
               }}>
-                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ffffff', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-strong)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <ShieldCheck size={16} color="var(--accent-emerald)" />
                   Statutory M&A Closing & Diligence Checklist
                 </h4>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--text-soft)' }}>
                     <CheckCircle2 size={15} color="var(--accent-emerald)" />
                     <span>HSR Antitrust Safe Harbor Analysis</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--text-soft)' }}>
                     <CheckCircle2 size={15} color="var(--accent-emerald)" />
                     <span>IP Patent Chain of Title Verified ({target.patentsCount} Patents)</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--text-soft)' }}>
                     <CheckCircle2 size={15} color="var(--accent-emerald)" />
                     <span>Zero Copyleft GPL/AGPL Contamination</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#cbd5e1' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--text-soft)' }}>
                     <CheckCircle2 size={15} color="var(--accent-emerald)" />
                     <span>R&W Insurance 1.0% Retention Cap</span>
                   </div>
