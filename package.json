@@ -11,11 +11,13 @@
     "start": "node server/index.mjs"
   },
   "dependencies": {
+    "@types/three": "^0.187.0",
     "canvas-confetti": "^1.9.4",
     "lucide-react": "^1.60.0",
     "motion": "^14.14.0",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react-dom": "^19.3.1",
+    "three": "^0.187.0"
   },
   "devDependencies": {
     "@types/canvas-confetti": "^1.9.0",

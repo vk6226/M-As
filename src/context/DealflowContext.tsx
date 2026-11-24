@@ -5,7 +5,7 @@ import { CURRENT_ACQUIRER, INITIAL_PIPELINE } from '../data/acquirerProfile';
 
 export type ResearchMarket = 'us' | 'in' | 'in-private';
 
-export type AppView = 'dashboard' | 'screener' | 'pipeline' | 'compare' | 'research' | 'activity' | 'documents' | 'aws-guide';
+export type AppView = 'home' | 'dashboard' | 'screener' | 'pipeline' | 'compare' | 'research' | 'activity' | 'documents' | 'aws-guide';
 
 interface ToastMessage {
   id: string;
@@ -86,7 +86,7 @@ export const DealflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return saved ? JSON.parse(saved) : INITIAL_PIPELINE;
   });
   const [acquirer] = useState<AcquirerProfile>(CURRENT_ACQUIRER);
-  const [currentView, setCurrentView] = useState<AppView>('dashboard');
+  const [currentView, setCurrentView] = useState<AppView>('home');
   const [researchCik, setResearchCik] = useState<string | null>(null);
   const [researchMarket, setResearchMarket] = useState<ResearchMarket>('us');
   const [researchSymbol, setResearchSymbol] = useState<string | null>(null);

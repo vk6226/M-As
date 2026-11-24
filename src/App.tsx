@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import { CheckCircle2, AlertTriangle, Info, X } from 'lucide-react';
 import { DealflowProvider, useDealflow, type AppView } from './context/DealflowContext';
-import { Sidebar } from './components/layout/Sidebar';
-import { Topbar } from './components/layout/Topbar';
+import { TopNav } from './components/layout/TopNav';
+import { HomeHero } from './components/landing/HomeHero';
 import { CommandPalette } from './components/layout/CommandPalette';
 import { viewIndex } from './components/layout/navConfig';
 import { DealOverviewDashboard } from './components/dashboard/DealOverviewDashboard';
@@ -19,6 +19,7 @@ import { AddTargetModal } from './components/screener/AddTargetModal';
 import { useAutoReveal, useSpotlight } from './hooks/useInteractionFx';
 
 const VIEWS: Record<AppView, React.FC> = {
+  home: HomeHero,
   dashboard: DealOverviewDashboard,
   screener: TargetScreener,
   pipeline: DealPipelineKanban,
@@ -39,9 +40,12 @@ const pageVariants = {
 
 const Ambient: React.FC = () => (
   <div className="ambient" aria-hidden>
-    <div className="ambient__blob ambient__blob--a" />
-    <div className="ambient__blob ambient__blob--b" />
-    <div className="ambient__blob ambient__blob--c" />
+    <div className="ambient__wash" />
+    <div className="ambient__rays">
+      <span />
+      <span />
+      <span />
+    </div>
     <div className="ambient__grid" />
     <div className="ambient__noise" />
   </div>
@@ -93,8 +97,6 @@ const Toasts: React.FC = () => {
 
 const MainAppContent: React.FC = () => {
   const { currentView } = useDealflow();
-  const [collapsed, setCollapsed] = useState(() => localStorage.getItem('aura_sidebar_collapsed') === '1');
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const pageRef = useRef<HTMLDivElement>(null);
 
@@ -109,10 +111,6 @@ const MainAppContent: React.FC = () => {
 
   useSpotlight();
   useAutoReveal(pageRef, currentView);
-
-  useEffect(() => {
-    localStorage.setItem('aura_sidebar_collapsed', collapsed ? '1' : '0');
-  }, [collapsed]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -144,53 +142,31 @@ const MainAppContent: React.FC = () => {
         transition={{ duration: 0.7, ease, opacity: { times: [0, 0.7, 1], duration: 0.9 } }}
       />
 
-      <div className={`app-shell${collapsed ? ' is-collapsed' : ''}${mobileOpen ? ' is-mobile-open' : ''}`}>
-        <Sidebar collapsed={collapsed} onToggleCollapse={() => setCollapsed((c) => !c)} onNavigate={() => setMobileOpen(false)} />
+      <div className={`app-shell${currentView === 'home' ? ' is-home' : ''}`}>
+        <TopNav onOpenPalette={() => setPaletteOpen(true)} />
 
-        <AnimatePresence>
-          {mobileOpen && (
-            <motion.div
-              className="mobile-scrim mobile-only"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMobileOpen(false)}
-            />
-          )}
-        </AnimatePresence>
+        <main className="page" ref={pageRef}>
+          <AnimatePresence mode="wait" custom={direction} initial={false}>
+            <motion.div key={currentView} custom={direction} variants={pageVariants} initial="initial" animate="animate" exit="exit">
+              <View />
+            </motion.div>
+          </AnimatePresence>
+        </main>
 
-        <div className="main-col">
-          <Topbar onOpenPalette={() => setPaletteOpen(true)} onOpenMobileNav={() => setMobileOpen(true)} />
-
-          <main className="page" ref={pageRef}>
-            <AnimatePresence mode="wait" custom={direction} initial={false}>
-              <motion.div
-                key={currentView}
-                custom={direction}
-                variants={pageVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-              >
-                <View />
-              </motion.div>
-            </AnimatePresence>
-          </main>
-
+        {currentView !== 'home' && (
           <footer className="app-footer">
             <div className="app-footer__inner">
               <div>
                 <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>AURA M&amp;A</span>
-                <span> — Target discovery, underwriting &amp; valuation orchestration</span>
+                <span> · Target discovery, underwriting and deal execution</span>
               </div>
               <div className="app-footer__chips">
-                <span>AWS ready</span>
-                <span>SOC 2 Type II architecture</span>
+                <span>Live data: SEC EDGAR · NSE India</span>
                 <span>Confidential</span>
               </div>
             </div>
           </footer>
-        </div>
+        )}
       </div>
 
       <TargetDossierModal />
